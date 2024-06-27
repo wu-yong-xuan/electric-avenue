@@ -101,7 +101,7 @@ class Edge {
 
    
 
-    strokeWeight(1)
+    strokeWeight(4)
     line(this.start.pos.x, this.start.pos.y, this.end.pos.x, this.end.pos.y);
 
 

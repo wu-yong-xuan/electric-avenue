@@ -1,4 +1,4 @@
-/// <reference path="../node_modules/@types/p5/global.d.ts" />
+// <reference path="../node_modules/@types/p5/global.d.ts" />
 
 let mnw
 let network
@@ -9,7 +9,7 @@ let plots = []
 let qtPlots
 let clipper
 function preload() {
-  networkSettings = loadJSON("data/nws_default.json")
+  networkSettings = loadJSON("data/nws_decent.json")
 }
 
 function setup() {
@@ -35,10 +35,11 @@ function setup() {
 }
 
 function draw() {
+  clear()
   background('#2d5425')
 
   river.display()
-  network.display({ showNodes: false })
+  network.display({ showNodes: true })
 
   // mnw.display()
   // trimmedGraph.display()  
@@ -154,6 +155,9 @@ function keyPressed() {
   }
   if (key == 's') {
     saveJSON(networkSettings, "networkSettings.json")
+  }
+  if (key == 'q') {
+    save('roads.svg')
   }
 }
 
