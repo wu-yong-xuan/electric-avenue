@@ -9,11 +9,13 @@ class Node {
     constructor(pos) {
         this.pos = pos
         this.setStatus()
+        this.isBridge = false
     }
 
     clone(){
         let newNode = new Node(createVector(this.pos.x, this.pos.y))
         newNode.id = this.id
+        newNode.isBridge = this.isBridge
         return newNode
     }
 
@@ -87,7 +89,12 @@ class Node {
     posAsNewVector() {
         return createVector(this.pos.x, this.pos.y)
     }
-
+    highlight() {
+        noStroke()
+        fill('black')
+        circle(this.pos.x, this.pos.y, 7)
+        this.display()
+    }
     display() {
         // text(this.NoC, this.pos.x, this.pos.y)
         // text(this.pos.heading().toFixed(1), this.pos.x, this.pos.y)

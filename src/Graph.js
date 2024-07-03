@@ -246,7 +246,7 @@ function removeDeadEnds(graph) {
       let next = true
       toBeRemoved.push(current)
       while (next) {
-        if (neighbor.connections == 2) {
+        if (neighbor.connections == 2 && !neighbor.isBridge) {
           toBeRemoved.push(neighbor)
           let newNeighbor = neighbor.getOtherNeighbors(current)[0]
           current = neighbor

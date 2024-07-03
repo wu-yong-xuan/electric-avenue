@@ -5,9 +5,12 @@ let network
 let trimmedGraph
 let river
 let shapes = []
+let neighborhood 
 let plots = []
 let qtPlots
 let clipper
+let pathfind = 0
+let n1, n2
 function preload() {
   networkSettings = loadJSON("data/nws_decent.json")
 }
@@ -39,11 +42,15 @@ function draw() {
   background('#2d5425')
 
   river.display()
+  neighborhood.display()
   network.display({ showNodes: true })
 
   // mnw.display()
   // trimmedGraph.display()  
-  shapes.forEach(s => s.display())
+  
+  //shapes.forEach(s => s.display())
+  
+
   // connectOuterDeadEnds()
 
   let points = network.nodes.map(n => n.asPoint())
@@ -125,10 +132,14 @@ function generateShapes() {
   trimmedGraph = result.trimmedGraph
   mnw = result.metaNetwork
   shapes = result.shapes
+  neighborhood = new Neighborhood(mnw, trimmedGraph, network)
 
   if (networkSettings.hasRiver) {
     shapes = shapes.filter(s => !geometric.polygonIntersectsPolygon(s.polygon.verts, river.poly))
   }
+  shapes.forEach(s => {
+    neighborhood.addBlock(new Block(s))
+  })
 }
 
 function generateNetwork() {
@@ -166,14 +177,52 @@ function keyReleased() {
     generateNetwork()
     generateShapes()
     loop()
+  } else if (key == 'i') {
+    network.iterate()
+    generateShapes()
+    generatePlots()
+    loop()
+  } else if (key == 'e') {
+    let block = neighborhood.getBlockFromCoords(mouseX, mouseY, 30)
+    if (block != null) {
+      block.powered = !block.powered
+      block.display(showNodes=true)
+      network.display({ showNodes: true })
+    } 
+  } else if (key == 'p') {
+    pathfind+= 1
+    pathfind = pathfind % 3
+    if (pathfind == 0) {
+      draw()
+      neighborhood.displayPath(neighborhood.shortestPath(n1, n2))
+    } else if (pathfind == 1) {
+      n1 = neighborhood.getBlockFromCoords(mouseX, mouseY, 30)
+      if (n1 == null) {
+        pathfind--
+      } else {
+        n1 = n1.mnwNodes[0]
+        n1.highlight()
+      }
+
+    } else {
+      n2 = neighborhood.getBlockFromCoords(mouseX, mouseY, 30)
+      if (n2 == null) {
+        pathfind--
+      } else {
+        n2 = n2.mnwNodes[0]
+        n2.highlight()
+      }
+    }
   }
 }
 
 function mouseClicked() {
-  network.iterate()
-  generateShapes()
-  generatePlots()
-  loop()
+  let block = neighborhood.getBlockFromCoords(mouseX, mouseY, 30)
+  if (block != null) {
+    block.occupied = !block.occupied
+    draw()
+  }
+
 }
 
 

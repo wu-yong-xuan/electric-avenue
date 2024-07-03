@@ -14,7 +14,7 @@ function detectClosedShapes(graph) {
 function createMetaNetworkFromGraph(graph) {
     let metaEdges = []
     let metaNodes = []
-    let nodes = graph.nodes.filter(n => n.connections >= 3)
+    let nodes = graph.nodes.filter(n => n.connections >= 3 || n.isBridge)
     // foreach node create a new 'meta node', which by definition will have > 3 connections
     // then trace each neighbor untill it reaches another node with connections > 3
     // then create 'meta edge' and store all the nodes with connections == 2 as vertices of said meta edge
@@ -29,7 +29,7 @@ function createMetaNetworkFromGraph(graph) {
             let next = nn
             verts.push(step)
             verts.push(next)
-            while (next.connections == 2) {
+            while (next.connections == 2 && !next.isBridge) {
                 let nextStep = next.getOtherNeighbors(step)[0]
                 step = next
                 next = nextStep
@@ -104,7 +104,8 @@ function detectCyclesInMetaNetwork(mnw, trimmed) {
             if (cycle != null) {
                 // get all the nodes which form the path, and filter out duplicates
                 let nodes = cycle.map(e => e.verts.flat()).flat()
-                let shape = createShapeFromPathNodes(nodes.filter(onlyUnique))                
+                let shape = createShapeFromPathNodes(nodes.filter(onlyUnique), cycle)
+                shape.metaEdge.push(me)
                 // STILL not quite.. need to use trimmed graph edges..?
                 // also this can be optimized by using a quad tree, no need to go over all nodes in the trimmed graph
                 let otherNodes = trimmed.nodes.filter(n => !nodes.includes(n))
@@ -189,7 +190,7 @@ function getOtherMetaNeighbors(current, edges) {
     return meta
 }
 
-function createShapeFromPathNodes(nodes) {
+function createShapeFromPathNodes(nodes, edges) {
     // need to sort nodes in order to draw polygon correctly
     // to do so we simply trace neighbors
     let sorted = []
@@ -204,7 +205,7 @@ function createShapeFromPathNodes(nodes) {
         current = neighbor
         neighbor = next[0]
     }
-    return new Shape(sorted.map(n => n.pos).flat())
+    return new Shape(sorted.map(n => n.pos).flat(), sorted, edges)
 }
 
 

@@ -1,7 +1,10 @@
 class Shape {
     // vertices PVector[]
-    constructor(vertices) {
+    constructor(vertices, nodes, edges) {
         this.polygon = new Polygon().forShape(vertices, 1)
+        this.nodes = nodes
+        this.edges = edges
+        this.metaEdge = []
     }
 
     display(color) {
