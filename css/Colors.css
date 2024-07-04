@@ -1,0 +1,22 @@
+:root {
+
+    /*  you can replace the entries labeled ??? with the color. 
+    Choose whatever format you want, if the program doesn't like it I can always fix it later 
+    Do let me know which color format you use in the case I need to reformat though
+    Color format = rgb #rrggbb  <==replace this with your actual format*/ 
+    --main-bg-color: ???;
+    --river-color: ???;
+    
+    /* block states */
+    --block-unoccupied: ???;
+    --block-powered: ???;
+    --block-unpowered: ???;
+    
+    /* network objects */
+    --road-color: ???; 
+
+    /* Feel free to add any extra color variables you can think of
+    Here is an example of how to add one */
+    --variable: chartreuse;
+
+  }
