@@ -3,7 +3,7 @@ class Block {
         this.shape = shape
         this.poly = shape.polygon
         this.verts = this.poly.verts
-        this.nodes = shape.nodes // nodes along perimter
+        this.nodes = shape.nodes // nodes along perimeter
         this.edges = shape.edges // edges between perimeter nodes
         this.mnwEdges = shape.metaEdge
         this.mnwNodes = this.mnwEdges.map(e => e.start).flat()
@@ -11,7 +11,27 @@ class Block {
         this.occupied = false
         this.center = geometric.polygonCentroid(this.verts)
     }
-
+    distributePower(powerlines, r = 3){ //input a list of powerlines
+        let powah = powerlines.filter(p => p.powered == true)
+        let fringe = new MinPQ()
+        let visited = []
+        this.nodes.forEach(n=>fringe.push(n, 0))
+        while (!fringe.isEmpty()) {
+            let v = fringe.pop()
+            if (v.priority == r) {continue}
+            powah.forEach(p=> {
+                if (p.node == v.item) {
+                    this.powered = true
+                }
+            })
+            visited.push(v.item);
+            v.item.neighbors.forEach(n => {
+                if (!visited.includes(n)) {
+                    fringe.push(n, 1 + v.priority)
+                }
+            })
+        }
+    }
 
     display() {
         this.poly.display('#2d5425', false)

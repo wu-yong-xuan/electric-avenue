@@ -4,16 +4,43 @@
     Choose whatever format you want, if the program doesn't like it I can always fix it later 
     Do let me know which color format you use in the case I need to reformat though
     Color format = rgb #rrggbb  <==replace this with your actual format*/ 
-    --main-bg-color: ???;
-    --river-color: ???;
+    --main-bg-fall-color: ???;
+    --river-fall-color: ???;
+
+    --main-bg-winter-color: ???;
+    --river-winter-color: ???;
+
+    --main-bg-spring-color: ???;
+    --river-spring-color: ???;
+
+    --main-bg-summer-color: ???;
+    --river-summer-color: ???;
     
     /* block states */
-    --block-unoccupied: ???;
-    --block-powered: ???;
+    --block-unoccupied: rgb(163, 33, 33);
+    --block-powered: #732a2a;
     --block-unpowered: ???;
+
+    --text-color: ???;
+    --text-box: ???;
+    --text-alert: ???;
     
     /* network objects */
     --road-color: ???; 
+
+    --transmission-line-color: ???;
+    --transmission-station-color: ???;
+
+    /* need shapes for specific substation (step up / down) */
+    --substation-stable-color: ???;
+    --substation-crit-color: ???;
+    --substation-fail-color: ???;
+    /* power generators */
+    --hydro-generator-color: ???;
+    --nuclear-generator-color: ???;
+    --solar-generator-color: ???;
+    --wind-generator-color: ???;
+    --fossil-generator-color: ???;
 
     /* Feel free to add any extra color variables you can think of
     Here is an example of how to add one */

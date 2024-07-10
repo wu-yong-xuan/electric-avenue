@@ -6,6 +6,9 @@ class Node {
     isActive = true
     status
 
+    //DO I WANT THIS IN NODE? OR ITS OWN CLASS?
+    isPowerline = false
+
     constructor(pos) {
         this.pos = pos
         this.setStatus()

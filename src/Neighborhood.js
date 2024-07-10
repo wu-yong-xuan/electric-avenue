@@ -16,7 +16,7 @@ class Neighborhood {
         let map = new Map()
         map.set(start, {prev: start, len:0})
         let visited = []
-        fringe.push(start, 0, 0);
+        fringe.push(start, 0);
          while (!fringe.isEmpty()) {
              let v = fringe.pop()
              if (v.item == stop) {
@@ -53,7 +53,13 @@ class Neighborhood {
             i++
             if (i<path.length) {
                 let metaN = n.metaNeighbors.filter(mn => mn.node == path[i])[0]
-                metaN.edge.display('purple')                
+                //metaN.edge.display('purple')       
+                for (let j = 1; j < metaN.edge.verts.length; j++) {
+                    metaN.edge.verts[j]
+                    stroke('purple')
+                    strokeWeight(4)
+                    line(metaN.edge.verts[j-1].pos.x, metaN.edge.verts[j-1].pos.y, metaN.edge.verts[j].pos.x, metaN.edge.verts[j].pos.y)
+                }         
             }
             n.highlight()
         })
@@ -70,6 +76,30 @@ class Neighborhood {
         let out = fringe.pop()
         if (out == null) {return null}
         return out.item
+    }
+    getNodeFromCoords(x,y, radius = 5) {
+        let block = this.getBlockFromCoords(x,y,radius)
+        let fringe = new MinPQ()
+        block.nodes.forEach(n=>{
+            let dst = dist(x, y, n.pos.x, n.pos.y)
+            if (dst <= radius) {
+                fringe.push(n, dst)
+            }
+        })
+        let out = fringe.pop()
+        if (out == null) {return null}
+        return out.item
+    }
+    getBlock(id) {
+        return this.blocks[id]
+    }
+    getBlockID(block) {
+        for (let i = 0; i < this.blocks.length; i++) {
+            if (this.blocks[i] == block) {
+                return i
+            }
+        }
+        return null
     }
 
     display() {

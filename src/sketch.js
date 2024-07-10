@@ -11,12 +11,19 @@ let qtPlots
 let clipper
 let pathfind = 0
 let n1, n2
+let selectedBlock
+let selectedBlockID
+
+//TEMP FOR DEBUGGING
+let pws = []
+
 function preload() {
   networkSettings = loadJSON("data/nws_decent.json")
 }
 
 function setup() {
-  createCanvas(1024, 1024, P2D)
+  createCanvas(1280, 1024, P2D)
+  width = 1024
 
   river = new River(width, height)
   network = new Network(width, height)
@@ -40,7 +47,6 @@ function setup() {
 function draw() {
   clear()
   background('#2d5425')
-
   river.display()
   neighborhood.display()
   network.display({ showNodes: true })
@@ -63,7 +69,11 @@ function draw() {
   if (networkSettings.showCurves) {
     responseCurves.display()
   }
+  drawUI()
 
+  //TEMPPP
+  pws.forEach(p=>p.display())
+  
   // networkRules[NextToIntersection].debugDraw()
   // network.stats()   
   noLoop()
@@ -159,6 +169,20 @@ function generateNetwork() {
   console.timeEnd(gen)
 }
 
+function drawUI() {
+  fill('grey')
+  rect(1024,0,1280,1024)
+  fill(255);
+  textSize(12);
+  textAlign(LEFT, CENTER);
+  if (selectedBlockID != undefined) {
+    text(`Block ID: ${selectedBlockID}`, 1048,24)
+    text(`Center Coords: ${Math.round(selectedBlock.center[0])}, ${Math.round(selectedBlock.center[1])}`,1048,48)
+    text(`Occupied?: ${selectedBlock.occupied}`, 1048,72)
+    text(`Powered?: ${selectedBlock.powered}`,1048,96)
+  }
+}
+
 function keyPressed() {
   if (key == ' ') {
     network.iterate()
@@ -183,12 +207,28 @@ function keyReleased() {
     generatePlots()
     loop()
   } else if (key == 'e') {
-    let block = neighborhood.getBlockFromCoords(mouseX, mouseY, 30)
-    if (block != null) {
-      block.powered = !block.powered
-      block.display(showNodes=true)
+    if (selectedBlock != null) {
+      selectedBlock.powered = !selectedBlock.powered
+      selectedBlock.display(showNodes=true)
       network.display({ showNodes: true })
+      drawUI()
+    }
+   } else if (key == 'o') {
+    if (selectedBlock != null) {
+      selectedBlock.occupied = !selectedBlock.occupied
+      selectedBlock.display(showNodes=true)
+      network.display({ showNodes: true })
+      drawUI()
     } 
+  } else if (key == 'l') { //TEMPPPPPP
+    let pop = new Powerline(neighborhood.getNodeFromCoords(mouseX,mouseY,30))
+    pop.powered = true
+    pws.push(pop)
+    neighborhood.blocks.forEach(b=>b.distributePower(pws))
+    draw()
+  } else if (key == 'a') {
+    neighborhood.blocks.forEach(b=>b.occupied=true)
+    draw()
   } else if (key == 'p') {
     pathfind+= 1
     pathfind = pathfind % 3
@@ -219,8 +259,9 @@ function keyReleased() {
 function mouseClicked() {
   let block = neighborhood.getBlockFromCoords(mouseX, mouseY, 30)
   if (block != null) {
-    block.occupied = !block.occupied
-    draw()
+    selectedBlock = block
+    selectedBlockID = neighborhood.getBlockID(block)
+    drawUI()
   }
 
 }
