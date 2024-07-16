@@ -13,16 +13,16 @@ let pathfind = 0
 let n1, n2
 let selectedBlock
 let selectedBlockID
+let dragging = false
+let selectedPL
 
-//TEMP FOR DEBUGGING
-let pws = []
 
 function preload() {
   networkSettings = loadJSON("data/nws_decent.json")
 }
 
 function setup() {
-  createCanvas(1280, 1024, P2D)
+  createCanvas(1024, 1024, P2D)
   width = 1024
 
   river = new River(width, height)
@@ -59,9 +59,9 @@ function draw() {
 
   // connectOuterDeadEnds()
 
-  let points = network.nodes.map(n => n.asPoint())
-  let hull = geometric.polygonHull(points)
-  let p = new Polygon(hull)
+  //let points = network.nodes.map(n => n.asPoint())
+  //let hull = geometric.polygonHull(points)
+  //let p = new Polygon(hull)
   // p.display()
 
   // qtPlots.each(qt => qt.plot.display())
@@ -69,14 +69,21 @@ function draw() {
   if (networkSettings.showCurves) {
     responseCurves.display()
   }
+  neighborhood.drawPL()
+  if (dragging) {
+    //draw()
+    strokeWeight(3)
+    stroke('black')
+    line(selectedPL.x,selectedPL.y, mouseX, mouseY);
+  }
   drawUI()
 
-  //TEMPPP
-  pws.forEach(p=>p.display())
+  
   
   // networkRules[NextToIntersection].debugDraw()
   // network.stats()   
-  noLoop()
+  
+  //noLoop()
 }
 
 function connectOuterDeadEnds() {
@@ -170,16 +177,16 @@ function generateNetwork() {
 }
 
 function drawUI() {
-  fill('grey')
-  rect(1024,0,1280,1024)
+  stroke(0)
+  strokeWeight(0)
   fill(255);
   textSize(12);
   textAlign(LEFT, CENTER);
   if (selectedBlockID != undefined) {
-    text(`Block ID: ${selectedBlockID}`, 1048,24)
-    text(`Center Coords: ${Math.round(selectedBlock.center[0])}, ${Math.round(selectedBlock.center[1])}`,1048,48)
-    text(`Occupied?: ${selectedBlock.occupied}`, 1048,72)
-    text(`Powered?: ${selectedBlock.powered}`,1048,96)
+    text(`Block ID: ${selectedBlockID}`, 300,24)
+    text(`Center Coords: ${Math.round(selectedBlock.center[0])}, ${Math.round(selectedBlock.center[1])}`,400,24)
+    text(`Occupied?: ${selectedBlock.occupied}`, 570,24)
+    text(`Powered?: ${selectedBlock.powered}`,700,24)
   }
 }
 
@@ -223,17 +230,22 @@ function keyReleased() {
   } else if (key == 'l') { //TEMPPPPPP
     let pop = new Powerline(neighborhood.getNodeFromCoords(mouseX,mouseY,30))
     pop.powered = true
-    pws.push(pop)
-    neighborhood.blocks.forEach(b=>b.distributePower(pws))
-    draw()
+    neighborhood.addPLine(pop)
+    neighborhood.distributePower()
+    //draw()
+
+  } else if (key == 'g') { //TEMPPPPPP
+    let gen = new PowerGenerator(mouseX, mouseY)
+    neighborhood.addPLine(gen)
+
   } else if (key == 'a') {
     neighborhood.blocks.forEach(b=>b.occupied=true)
-    draw()
+    //draw()
   } else if (key == 'p') {
     pathfind+= 1
     pathfind = pathfind % 3
     if (pathfind == 0) {
-      draw()
+      //draw()
       neighborhood.displayPath(neighborhood.shortestPath(n1, n2))
     } else if (pathfind == 1) {
       n1 = neighborhood.getBlockFromCoords(mouseX, mouseY, 30)
@@ -263,8 +275,40 @@ function mouseClicked() {
     selectedBlockID = neighborhood.getBlockID(block)
     drawUI()
   }
-
 }
+function mousePressed() {
+  let pl = neighborhood.getPLineFromCoords(mouseX, mouseY, 30)
+  if (pl != null) {
+    selectedPL = pl
+    dragging = true
+  }
+}
+function mouseReleased() {
+  if (dragging) {
+    //draw()
+    let n = neighborhood.getNodeFromCoords(mouseX,mouseY,30)
+    if (n!=null) {
+      let pop = new Powerline(n)
+      let ple = new PowerlineEdge(selectedPL,pop)
+      if (ple.dst > 10) {
+        pop.powered = selectedPL.powered
+        neighborhood.addPLine(pop)
+        neighborhood.addPLineEdge(ple)
+        neighborhood.distributePower()
+      //draw()
+      }
+    }
+  }
+  dragging = false
+}
+// function mouseDragged() {
+//   if (dragging) {
+//     draw()
+//     strokeWeight(3)
+//     stroke('black')
+//     line(selectedPL.x,selectedPL.y, mouseX, mouseY);
+//   }
+// }
 
 
 

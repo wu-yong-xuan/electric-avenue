@@ -4,9 +4,25 @@ class Neighborhood {
         this.mnw = mnw
         this.trim = trim
         this.net = net
+        this.pl = []
+        this.plEdges = []
     }
     addBlock(block) {
         this.blocks.push(block)
+    }
+
+    //for all pow network obj, was originally for power lines hence the name but now repurposed to hold all
+    //power network objects. 
+    addPLine(pline) {
+        this.pl.push(pline)
+    }
+
+    addPLineEdge(ple) {
+        this.plEdges.push(ple)
+    }
+
+    distributePower() {
+        this.blocks.forEach(b=>b.distributePower(this.pl))
     }
 
     //implementation of dijkstras 
@@ -77,8 +93,21 @@ class Neighborhood {
         if (out == null) {return null}
         return out.item
     }
+    getPLineFromCoords(x,y, radius = 5) {
+        let fringe = new MinPQ()
+        this.pl.forEach(p => {
+            let dst = dist(x, y, p.x, p.y)
+            if (dst <= radius) {
+                fringe.push(p, dst)
+            }
+        })
+        let out = fringe.pop()
+        if (out == null) {return null}
+        return out.item
+    }
     getNodeFromCoords(x,y, radius = 5) {
         let block = this.getBlockFromCoords(x,y,radius)
+        if (block == null) { return null    }
         let fringe = new MinPQ()
         block.nodes.forEach(n=>{
             let dst = dist(x, y, n.pos.x, n.pos.y)
@@ -104,5 +133,9 @@ class Neighborhood {
 
     display() {
         this.blocks.forEach(b => b.display())
+    }
+    drawPL() {
+        this.pl.forEach(p=>p.display())
+        this.plEdges.forEach(pe => pe.display())
     }
 }

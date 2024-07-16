@@ -1,6 +1,4 @@
-// NOT SURE IF I WANT TO DO THIS OR JUST ADD IT TO THE NODE CLASS
-
-class Powerline {
+class Substation {
     constructor(node) {
         this.node = node
         this.x = node.pos.x
@@ -10,7 +8,7 @@ class Powerline {
         this.sources = []
         this.edgein = []
         this.edgeout = []
-        this.connectedBlocks = []
+        this.voltage 
     }
     addIn (edge) {
         this.edgein.push(edge)
@@ -24,13 +22,9 @@ class Powerline {
     addSrc(src) {
         this.sources.push(src)
     }
-    connectBlock(block) {
-        this.connectedBlocks.push(block)
-    }
     async powerOn() {
         if (!this.powered) {
             this.powered = true
-            this.connectedBlocks.forEach(b => b.connectPL(this))
             this.edgeout.forEach(e=> e.powered = true)
             if (this.destinations.length!=0) {
                 await sleep (250)
@@ -41,7 +35,6 @@ class Powerline {
     async powerOff(){
         if (this.powered) {
             this.powered = false
-            this.connectedBlocks.forEach(b => b.disconnectPL(this))
             this.edgeout.forEach(e=> e.powered = false)
             if (this.destinations.length!=0) {
                 await sleep (250)
@@ -51,7 +44,7 @@ class Powerline {
     }
     display() {
         noStroke()
-        fill('cornflowerblue')
+        fill('lavendar')
         circle(this.x, this.y, 10)
     }
 

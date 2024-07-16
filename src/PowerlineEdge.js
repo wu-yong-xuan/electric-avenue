@@ -4,15 +4,32 @@ class PowerlineEdge {
     constructor(start, end) {
         this.start = start
         this.end = end
-        this.y = node.pos.y
-        this.powered = false
+        this.dst = dist(start.x, start.y, end.x, end.y)
+        this.powered = start.powered
+        start.addDest(end)
+        end.addSrc(start)
+        start.addOut(this)
+        end.addIn(this)
     }
 
-
+    powerOn(){
+        this.powered = true
+        this.end.powerOn()
+    }
+    powerOff() {
+        this.powered = false
+        this.end.powerOff()
+    }
     display() {
-        noStroke()
-        fill('cornflowerblue')
-        circle(this.x, this.y, 10)
+        if (this.powered) {
+            stroke('gold')
+            strokeWeight(3)
+            dashedLine(this.end.x, this.end.y, this.start.x, this.start.y, [7, 7],(frameCount/6)%14)
+        } else {
+            stroke('fuchsia')
+            strokeWeight(3)
+            dashedLine(this.end.x, this.end.y, this.start.x, this.start.y, [7, 7],0)
+        }
     }
 
 

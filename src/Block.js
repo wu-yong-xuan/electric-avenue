@@ -10,6 +10,7 @@ class Block {
         this.powered = false
         this.occupied = false
         this.center = geometric.polygonCentroid(this.verts)
+        this.connectedPL = []
     }
     distributePower(powerlines, r = 3){ //input a list of powerlines
         let powah = powerlines.filter(p => p.powered == true)
@@ -22,6 +23,8 @@ class Block {
             powah.forEach(p=> {
                 if (p.node == v.item) {
                     this.powered = true
+                    p.connectBlock(this)
+                    this.connectedPL.push(p)
                 }
             })
             visited.push(v.item);
@@ -31,6 +34,31 @@ class Block {
                 }
             })
         }
+    }
+    disconnectPL (pl) {
+        let i = this.connectedPL.indexOf(pl)
+        if (i!= -1) {
+            this.connectedPL.splice(i,1)
+            if (this.connectedPL.length == 0) {
+                this.powered = false
+            }
+        }
+    }
+    connectPL (pl) {
+        this.connectedPL.push(pl)
+        this.powered = true
+    }
+    getClosestNode(x, y) {
+        let closest = this.nodes[0]
+        let min = dist(x,y,closest.pos.x,closest.pos.y)
+        this.nodes.forEach(n=> {
+            let dst = dist(x,y,n.pos.x,n.pos.y)
+            if (dst < min) {
+                min = dst
+                closest = n
+            }
+        })
+        return closest
     }
 
     display() {
