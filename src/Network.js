@@ -164,7 +164,7 @@ class Network {
             // text(i, n.pos.x, n.pos.y)                       
         })
 
-        this.edges.forEach(l => l.display('darkgray'))
+        this.edges.forEach(l => l.display('black'))
         this.nodes.forEach(n => {
             // textSize(5)
             // text(this.nodes.indexOf(n), n.pos.x, n.pos.y)

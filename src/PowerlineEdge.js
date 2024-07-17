@@ -10,6 +10,7 @@ class PowerlineEdge {
         end.addSrc(start)
         start.addOut(this)
         end.addIn(this)
+        this.path
     }
 
     powerOn(){
@@ -31,6 +32,19 @@ class PowerlineEdge {
             dashedLine(this.end.x, this.end.y, this.start.x, this.start.y, [7, 7],0)
         }
     }
+    findPath(neighborhood) {
+        this.path = neighborhood.shortestPath(this.start.node, this.end.node)
+    }
+    drawPath(neighborhood) {
+        if (this.start instanceof PowerGenerator) {
+            this.display()
+        } else if (this.powered) {
+            neighborhood.displayPath(this.path,'gold',[7,7],(frameCount/6)%14)
+        } else {
+            neighborhood.displayPath(this.path,'fuchsia',[7,7],0)
+        }
+    }
+    
 
 
 

@@ -49,7 +49,7 @@ function draw() {
   background('#2d5425')
   river.display()
   neighborhood.display()
-  network.display({ showNodes: true })
+  network.display({ showNodes: false })
 
   // mnw.display()
   // trimmedGraph.display()  
@@ -246,7 +246,7 @@ function keyReleased() {
     pathfind = pathfind % 3
     if (pathfind == 0) {
       //draw()
-      neighborhood.displayPath(neighborhood.shortestPath(n1, n2))
+      neighborhood.displayMnwPath(neighborhood.shortestPathMnw(n1, n2))
     } else if (pathfind == 1) {
       n1 = neighborhood.getBlockFromCoords(mouseX, mouseY, 30)
       if (n1 == null) {
