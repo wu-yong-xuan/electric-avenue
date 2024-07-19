@@ -4,17 +4,17 @@
     Choose whatever format you want, if the program doesn't like it I can always fix it later 
     Do let me know which color format you use in the case I need to reformat though
     Color format = rgb #rrggbb  <==replace this with your actual format*/ 
-    --main-bg-fall-color: ???;
-    --river-fall-color: ???;
+    --main-bg-fall-color: #DC8B5D;
+    --river-fall-color: #3222B8;
 
-    --main-bg-winter-color: ???;
-    --river-winter-color: ???;
+    --main-bg-winter-color: #4BB6C8;
+    --river-winter-color: #192C81;
 
-    --main-bg-spring-color: ???;
-    --river-spring-color: ???;
+    --main-bg-spring-color: #8CB960;
+    --river-spring-color: #005EBD;
 
-    --main-bg-summer-color: ???;
-    --river-summer-color: ???;
+    --main-bg-summer-color: #F0A853;
+    --river-summer-color: #1E2CE5;
     
     /* block states */
     --block-unoccupied: rgb(163, 33, 33);
