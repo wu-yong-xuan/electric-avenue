@@ -51,7 +51,7 @@ function setup() {
   
 
   createCanvas(1280, 640, P2D)
-  offset = createVector(0, 0);
+  offset = createVector(0, -200);
   window.addEventListener("wheel", e => {
     const s = 1 - (e.deltaY / 1000);
     scalef *= s;
@@ -62,8 +62,9 @@ function setup() {
       .add(mouse)
 
   }); 
-
-  river = new River(width, 2*height)
+  width = 1024
+  height = 1024
+  river = new River(width, height)
   network = new Network(width, height)
 
   networkRules.initialize()
@@ -123,7 +124,7 @@ function draw() {
     //draw()
     strokeWeight(3)
     stroke('black')
-    line(selectedPL.x,selectedPL.y, mouseX-offset.x, mouseY-offset.y);
+    line(selectedPL.x,selectedPL.y, (mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef);
   }
   drawUI()
 
@@ -304,7 +305,7 @@ function keyReleased() {
     //draw()
 
   } else if (key == 'g') { //TEMPPPPPP
-    let gen = new PowerGenerator(mouseX-offset.x, mouseY-offset.y)
+    let gen = new PowerGenerator((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef)
     neighborhood.addPLine(gen)
 
   } else if (key == 'a') {
@@ -323,7 +324,7 @@ function keyReleased() {
       //draw()
       neighborhood.displayMnwPath(neighborhood.shortestPathMnw(n1, n2))
     } else if (pathfind == 1) {
-      n1 = neighborhood.getBlockFromCoords(mouseX-offset.x, mouseY-offset.y, 30)
+      n1 = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
       if (n1 == null) {
         pathfind--
       } else {
@@ -332,7 +333,7 @@ function keyReleased() {
       }
 
     } else {
-      n2 = neighborhood.getBlockFromCoords(mouseX-offset.x, mouseY-offset.y, 30)
+      n2 = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
       if (n2 == null) {
         pathfind--
       } else {
@@ -344,7 +345,7 @@ function keyReleased() {
 }
 
 function mouseClicked() {
-  let block = neighborhood.getBlockFromCoords(mouseX-offset.x, mouseY-offset.y, 30)
+  let block = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
   if (block != null && tool == 'select') {
     selectedBlock = block
     selectedBlockID = neighborhood.getBlockID(block)
@@ -352,7 +353,7 @@ function mouseClicked() {
   }
 }
 function mousePressed() {
-  let pl = neighborhood.getPLineFromCoords(mouseX-offset.x, mouseY-offset.y, 30)
+  let pl = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
   if (pl != null) {
     selectedPL = pl
     dragging = true
@@ -363,7 +364,7 @@ function mouseReleased() {
   if (dragging) {
     //draw()
     if (tool == 'select') {
-      let n = neighborhood.getNodeFromCoords(mouseX-offset.x, mouseY-offset.y ,50)
+      let n = neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,50)
       if (n!=null) {
         let _add = true
         if (neighborhood.pl.some(p => {
