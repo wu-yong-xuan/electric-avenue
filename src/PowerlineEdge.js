@@ -11,6 +11,7 @@ class PowerlineEdge {
         start.addOut(this)
         end.addIn(this)
         this.path
+        this.len = this.dst
     }
 
     powerOn(){
@@ -34,6 +35,11 @@ class PowerlineEdge {
     }
     findPath(neighborhood) {
         this.path = neighborhood.shortestPath(this.start.node, this.end.node)
+        let temp = 0
+        for (let i = 1; i < this.path.length; i++) {
+            temp += dist(this.path[i].pos.x, this.path[i].pos.y, this.path[i-1].pos.x, this.path[i-1].pos.y)
+        }  
+        this.len = temp
     }
     drawPath(neighborhood) {
         if (this.start instanceof PowerGenerator) {

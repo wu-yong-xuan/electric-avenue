@@ -11,9 +11,10 @@ class Block {
         this.occupied = false
         this.center = geometric.polygonCentroid(this.verts)
         this.connectedPL = []
+        this.area = geometric.polygonArea(this.verts)
     }
     distributePower(powerlines, r = 3){ //input a list of powerlines
-        let powah = powerlines.filter(p => p.powered == true)
+        let powah = powerlines.filter(p => p.powered == true && !(p instanceof Substation))
         let fringe = new MinPQ()
         let visited = []
         this.nodes.forEach(n=>fringe.push(n, 0))

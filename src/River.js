@@ -210,7 +210,7 @@ class River {
         })
     }
 
-    display() {
+    display(color) {
         this.nodes.forEach(n => {
             noStroke()
             fill('blue')
@@ -230,7 +230,7 @@ class River {
         // endShape()
 
         beginShape()
-        fill('#253854')
+        fill(color)
         this.poly.forEach(p => vertex(p[0], p[1]))
         endShape()
     }

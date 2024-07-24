@@ -23,6 +23,19 @@ class Neighborhood {
             ple.findPath(this)
         }
     }
+    rmPLine(pline) {
+        let i = this.pl.indexOf(pline)
+        if (i!= -1) {
+            this.pl.splice(i,1)
+        }
+    }
+
+    rmPLineEdge(ple) {
+        let i = this.plEdges.indexOf(ple)
+        if (i!= -1) {
+            this.plEdges.splice(i,1)
+        }
+    }
 
     distributePower() {
         this.blocks.forEach(b=>b.distributePower(this.pl))
