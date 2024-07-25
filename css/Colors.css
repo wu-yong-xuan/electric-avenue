@@ -11,10 +11,10 @@
     --river-winter-color: #192C81;
 
     --main-bg-spring-color: #8CB960;
-    --river-spring-color: #005EBD;
+    --river-spring-color: #1E86FF;
 
     --main-bg-summer-color: #F0A853;
-    --river-summer-color: #1E2CE5;
+    --river-summer-color: #144FF5;
     
     /* block states */
     --block-unoccupied: rgb(163, 33, 33);
@@ -26,15 +26,16 @@
     --text-alert: ???;
     
     /* network objects */
-    --road-color: ???; 
+    --road-color: #373250; 
 
-    --transmission-line-color: ???;
-    --transmission-station-color: ???;
+    --transmission-line-color: #F5FF64;
+    --transmission-station-color: #4CFF5D;
+    /*current transmission color is a placeholder taken from fill color of generator SVGs*/
 
     /* need shapes for specific substation (step up / down) */
-    --substation-stable-color: ???;
-    --substation-crit-color: ???;
-    --substation-fail-color: ???;
+    --substation-stable-color: #FFFF3C;
+    --substation-crit-color: #FF6D00;
+    --substation-fail-color: #FF1143;
     /* power generators */
     --hydro-generator-color: ???;
     --nuclear-generator-color: ???;
