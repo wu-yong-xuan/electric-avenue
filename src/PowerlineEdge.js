@@ -22,13 +22,13 @@ class PowerlineEdge {
         this.powered = false
         this.end.powerOff()
     }
-    display() {
+    display(on = 'gold', off = 'fuchsia') {
         if (this.powered) {
-            stroke('gold')
+            stroke(on)
             strokeWeight(3)
             dashedLine(this.end.x, this.end.y, this.start.x, this.start.y, [7, 7],(frameCount/6)%14)
         } else {
-            stroke('fuchsia')
+            stroke(off)
             strokeWeight(3)
             dashedLine(this.end.x, this.end.y, this.start.x, this.start.y, [7, 7],0)
         }
@@ -41,13 +41,13 @@ class PowerlineEdge {
         }  
         this.len = temp
     }
-    drawPath(neighborhood) {
+    drawPath(neighborhood, on = 'gold', off = 'fuchsia') {
         if (this.start instanceof PowerGenerator) {
             this.display()
         } else if (this.powered) {
-            neighborhood.displayPath(this.path,'gold',[7,7],(frameCount/6)%14)
+            neighborhood.displayPath(this.path, on ,[7,7],(frameCount/6)%14)
         } else {
-            neighborhood.displayPath(this.path,'fuchsia',[7,7],0)
+            neighborhood.displayPath(this.path,off,[7,7],0)
         }
     }
     

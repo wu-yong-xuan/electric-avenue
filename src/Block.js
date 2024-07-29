@@ -62,13 +62,13 @@ class Block {
         return closest
     }
 
-    display() {
-        this.poly.display('#2d5425', false)
+    display(on, off) {
+        //this.poly.display('#2d5425', false)
         if (this.occupied) {
             if (!this.powered) {
-                this.poly.display('rgba(255,0,0,0.4)', false)
+                this.poly.display(off, false)
             } else {
-                this.poly.display('rgba(0,0,255,0.4)', false)
+                this.poly.display(on, false)
             }
         } else {
             this.poly.display('rgba(255,255,255,.3)', false)

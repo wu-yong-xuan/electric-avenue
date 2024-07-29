@@ -154,7 +154,7 @@ class Network {
         return found
     }
 
-    display({showNodes = false} = {}) {
+    display({showNodes = false} = {}, edge = 'black') {
         // console.log("----------display " + this.it + "----------")
 
         this.nodes.forEach(n => {
@@ -164,7 +164,7 @@ class Network {
             // text(i, n.pos.x, n.pos.y)                       
         })
 
-        this.edges.forEach(l => l.display('black'))
+        this.edges.forEach(l => l.display(edge))
         this.nodes.forEach(n => {
             // textSize(5)
             // text(this.nodes.indexOf(n), n.pos.x, n.pos.y)

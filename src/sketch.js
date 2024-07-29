@@ -24,6 +24,9 @@ let pCost = 0
 let pop 
 let ple
 
+let deletethis = 1
+let deletee = 1
+let gameOver = false
 
 function preload() {
   networkSettings = loadJSON("data/nws_decent.json")
@@ -47,7 +50,20 @@ function setup() {
       bg: getComputedStyle(document.documentElement).getPropertyValue('--main-bg-summer-color'), 
       river: getComputedStyle(document.documentElement).getPropertyValue('--river-summer-color')
     })
-
+  colors.set('block', {
+      on: getComputedStyle(document.documentElement).getPropertyValue('--block-powered'), 
+      off: getComputedStyle(document.documentElement).getPropertyValue('--block-unpowered')
+  })
+  colors.set('road', {
+    color: getComputedStyle(document.documentElement).getPropertyValue('--road-color'), 
+    transmission: getComputedStyle(document.documentElement).getPropertyValue('--transmission-line-color'),
+    station: getComputedStyle(document.documentElement).getPropertyValue('--transmission-station-color')
+  })
+  colors.set('substation', {
+    stable: getComputedStyle(document.documentElement).getPropertyValue('--substation-stable-color'), 
+    crit: getComputedStyle(document.documentElement).getPropertyValue('--substation-crit-color'),
+    fail: getComputedStyle(document.documentElement).getPropertyValue('--substation-fail-color')
+  })
   
 
   createCanvas(1280, 640, P2D)
@@ -82,13 +98,19 @@ function setup() {
   clipper = new ClipperLib.Clipper();
   gamestate = new GameState(neighborhood, colors)
 
+  // DELETE THIS LATER
+  neighborhood.blocks.forEach(b=>b.occupied=true)
 }
 
 function draw() {
   clear()
 
-  if (frameCount % 600 == 0) {
+  if (frameCount % 60 == 0) {
     gamestate.timestep()
+  }
+  if (gamestate.resource < -20000) {
+    gameover()
+    return
   }
   const mouse = createVector(mouseX, mouseY);
   const relativeMouse = mouse.copy().sub(offset); //?????
@@ -97,8 +119,8 @@ function draw() {
   translate(offset.x, offset.y);
   scale(scalef)
   river.display(gamestate.riverColor)
-  neighborhood.display()
-  network.display({ showNodes: false })
+  neighborhood.display(gamestate.colorScheme.get('block').on, gamestate.colorScheme.get('block').off)
+  network.display({ showNodes: false }, gamestate.colorScheme.get('road').color)
   
 
   // mnw.display()
@@ -119,7 +141,7 @@ function draw() {
   if (networkSettings.showCurves) {
     responseCurves.display()
   }
-  neighborhood.drawPL()
+  neighborhood.drawPL(gamestate.colorScheme.get('road').transmission)
   if (dragging && tool == 'select') {
     //draw()
     strokeWeight(3)
@@ -246,9 +268,36 @@ function drawUI() {
     text('press ENTER to confirm or ESC to cancel', 600,48)
     text(`Remaining Resouces: ${gamestate.resource-pCost}`, 1000,48)
   }
+
+  // TEMPORARY
+  text('Press G to place a generator (only 1)', 1000, 72)
+  text('Press H to place a service station (only 1)', 1000, 96)
+  text('Press 1 to switch to pan mode', 1000, 120)
+  text('Press 2 to switch to build mode', 1000, 144)
+  text('Press 3 to switch to repair mode', 1000, 168)
+
+}
+
+function gameover() {
+  clear()
+  gameOver = true
+  background('white')
+  // scale(1/scalef)
+  // translate(-offset.x, -offset.y);
+  stroke(0)
+  strokeWeight(1)
+  fill('Grey');
+  textSize(24);
+  textAlign(LEFT, CENTER);
+  text('GAME OVER - you went bankrupt', 600,96)
+  text('reload the page to try again', 600,144)
+  noLoop()
 }
 
 function keyPressed() {
+  if (gameOver) {
+    return
+  }
   if (key == ' ') {
     network.iterate()
     loop()
@@ -262,14 +311,18 @@ function keyPressed() {
 }
 
 function keyReleased() {
+  if (gameOver) {
+    return
+  }
   if (tool == 'confirm-PL') {
     if (keyCode === ENTER) {
       neighborhood.distributePower()
       gamestate.buyPL(ple.len)
+      if (pop.powered) {pop.powerOn()}
       tool = 'select'
       pCost = 0
     } else if (keyCode === ESCAPE) {
-      neighborhood.rmPLine(pop)
+      if (pop.sources.length + pop.destinations.length <= 2) {neighborhood.rmPLine(pop)}
       neighborhood.rmPLineEdge(ple)
       tool = 'select'
       pCost = 0
@@ -298,15 +351,30 @@ function keyReleased() {
       drawUI()
     } 
   } else if (key == 'l') { //TEMPPPPPP
-    let pop = new Powerline(neighborhood.getNodeFromCoords(mouseX+offset.x,mouseY+offset.y,30))
+    let pop = new Powerline(neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,50))
     pop.powered = true
     neighborhood.addPLine(pop)
     neighborhood.distributePower()
     //draw()
 
   } else if (key == 'g') { //TEMPPPPPP
-    let gen = new PowerGenerator((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef)
-    neighborhood.addPLine(gen)
+    if (deletethis > 0) {
+      let gen = new PowerGenerator((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef)
+      neighborhood.addPLine(gen)
+      deletethis--
+    }
+
+  } else if (key == 'h') { //TEMPPPPPP
+    if (deletee>0) {
+      let n = neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,50)
+      if (n!= null) {
+        let station = new ServiceStation(n)
+        neighborhood.addStation(station)
+        station.addCrew(new ServiceTeam())
+        deletee--
+      }
+      
+    }
 
   } else if (key == 'a') {
     neighborhood.blocks.forEach(b=>b.occupied=true)
@@ -316,6 +384,9 @@ function keyReleased() {
     //draw()
   }else if (key == '2') {
     tool = 'select'
+    //draw()
+  }else if (key == '3') {
+    tool = 'repair'
     //draw()
   } else if (key == 'p') {
     pathfind+= 1
@@ -345,14 +416,24 @@ function keyReleased() {
 }
 
 function mouseClicked() {
+  if (gameOver) {
+    return
+  }
   let block = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
   if (block != null && tool == 'select') {
     selectedBlock = block
     selectedBlockID = neighborhood.getBlockID(block)
     drawUI()
   }
+  let pl = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
+  if (pl != null && tool == 'repair') {
+    neighborhood.stations[0].dispatchCrew(pl, neighborhood)
+  }
 }
 function mousePressed() {
+  if (gameOver) {
+    return
+  }
   let pl = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
   if (pl != null) {
     selectedPL = pl
@@ -361,6 +442,9 @@ function mousePressed() {
   
 }
 function mouseReleased() {
+  if (gameOver) {
+    return
+  }
   if (dragging) {
     //draw()
     if (tool == 'select') {
@@ -385,14 +469,18 @@ function mouseReleased() {
         }
         ple = new PowerlineEdge(selectedPL,pop)
         if (ple.dst > 10) {
-          pop.powered = selectedPL.powered
-          if (_add) {neighborhood.addPLine(pop)}
+          if (_add) {
+            neighborhood.addPLine(pop)
+            pop.powered = selectedPL.powered
+          }
           neighborhood.addPLineEdge(ple)
           pCost = gamestate.powerlineCost(ple.len)
           if (pCost > gamestate.resource) {
             pCost = String(pCost) + '\nTOO EXPENSIVE'
-            neighborhood.rmPLine(pop)
-            neighborhood.rmPLineEdge(ple)
+            if (_add) { 
+              neighborhood.rmPLine(pop)
+              neighborhood.rmPLineEdge(ple)
+            }
           } else {
             tool = 'confirm-PL'
           }
@@ -418,6 +506,8 @@ function mouseDragged() {
 //     line(selectedPL.x,selectedPL.y, mouseX, mouseY);
 //   }
  }
+
+ 
 
 
 

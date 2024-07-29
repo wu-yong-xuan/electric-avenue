@@ -6,6 +6,7 @@ class Neighborhood {
         this.net = net
         this.pl = []
         this.plEdges = []
+        this.stations = []
     }
     addBlock(block) {
         this.blocks.push(block)
@@ -15,6 +16,9 @@ class Neighborhood {
     //power network objects. 
     addPLine(pline) {
         this.pl.push(pline)
+    }
+    addStation(sta) {
+        this.stations.push(sta)
     }
 
     addPLineEdge(ple) {
@@ -39,6 +43,13 @@ class Neighborhood {
 
     distributePower() {
         this.blocks.forEach(b=>b.distributePower(this.pl))
+    }
+
+    randomFailure() {
+        let p = getRandom(this.pl.filter(p=>p instanceof Powerline))
+        p.critical = true
+        p.powerOff()
+        
     }
 
     //implementation of dijkstras 
@@ -202,12 +213,13 @@ class Neighborhood {
         return null
     }
 
-    display() {
-        this.blocks.forEach(b => b.display())
+    display(on='rgba(255,0,0,0.4)', off='rgba(0,0,255,0.4)') {
+        this.blocks.forEach(b => b.display(on, off))
     }
 
-    drawPL() {
+    drawPL(on = 'gold', off = 'fuchsia') {
         this.pl.forEach(p=>p.display())
-        this.plEdges.forEach(pe => pe.drawPath(this))
+        this.plEdges.forEach(pe => pe.drawPath(this, on ,off))
+        this.stations.forEach(s=> s.display())
     }
 }

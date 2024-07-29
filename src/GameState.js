@@ -9,6 +9,9 @@ class GameState {
         this.costfn = cost
         this.incomefn = income
         this.step = 0
+        this.activeArea = 0
+        this.load = 0
+        this.startupTime = 30
     }
 
     changeSeason(season) {
@@ -33,31 +36,62 @@ class GameState {
         }
     }
     cost1() {
-        this.resource -= 10000
+        if (this.startupTime>0) {
+            this.startupTime -= 1
+        } else {
+            this.resource -= 300 * this.neighborhood.pl.length
+        }
     }
-    income1() {
-        let area = 0
+    calcArea() {
+        this.activeArea = 0
         this.neighborhood.blocks.forEach(b => {
             if (b.occupied && b.powered) {
-                area += b.area
+                this.activeArea += b.area
             }
         })
-        this.resource += Math.round(area)
+        this.activeArea = Math.round(this.activeArea)
     }
+    income1() {
+        this.resource += Math.round(this.activeArea/10)
+    }
+
     buyPL(length) {
         this.resource -= this.powerlineCost(length)
     }
     powerlineCost(length) {
         return Math.round(10000 + length*50)
+    }   
+
+    calculateLoad() {
+        let numGens = 0
+        neighborhood.pl.forEach(p => {
+            if (p instanceof PowerGenerator) {numGens++}
+        })
+        this.load = this.activeArea / numGens
     }
+    failure() {
+        let r = Math.random()
+        if (r < this.load / 1000000) {
+            print(this.load, r)
+            print(this.load/1000000)
+            neighborhood.randomFailure()
+        }
+    }
+
+
     timestep(){
         this.step++
+        this.calcArea()
+        this.calculateLoad()
         this.costfn()
         this.incomefn()
-        if (this.step%6 == 0) {
+        this.failure()
+        if (this.step%60 == 0) {
             this.nextSeason(this.season)
         }
     }
+
+
 
 
 

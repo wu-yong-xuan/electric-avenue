@@ -11,6 +11,7 @@ class Powerline {
         this.edgein = []
         this.edgeout = []
         this.connectedBlocks = []
+        this.critical = false
     }
     addIn (edge) {
         this.edgein.push(edge)
@@ -28,7 +29,7 @@ class Powerline {
         this.connectedBlocks.push(block)
     }
     async powerOn() {
-        if (!this.powered) {
+        if (!this.powered && !this.critical) {
             this.powered = true
             this.connectedBlocks.forEach(b => b.connectPL(this))
             this.edgeout.forEach(e=> e.powered = true)
@@ -39,7 +40,7 @@ class Powerline {
         }
     }
     async powerOff(){
-        if (this.powered) {
+        if (this.powered && (!this.edgein.some(e=>e.powered) || this.critical)) {
             this.powered = false
             this.connectedBlocks.forEach(b => b.disconnectPL(this))
             this.edgeout.forEach(e=> e.powered = false)
@@ -51,7 +52,11 @@ class Powerline {
     }
     display() {
         noStroke()
-        fill('cornflowerblue')
+        if (!this.critical) {
+            fill('cornflowerblue')
+        } else {
+            fill('red')
+        }
         circle(this.x, this.y, 10)
     }
 
