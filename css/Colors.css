@@ -5,16 +5,16 @@
     Do let me know which color format you use in the case I need to reformat though
     Color format = rgb #rrggbb  <==replace this with your actual format*/ 
     --main-bg-fall-color: #DC8B5D;
-    --river-fall-color: #3222B8;
+    --river-fall-color: #C38167;
 
     --main-bg-winter-color: #4BB6C8;
-    --river-winter-color: #192C81;
+    --river-winter-color: #325981;
 
     --main-bg-spring-color: #8CB960;
-    --river-spring-color: #1E86FF;
+    --river-spring-color: #829B74;
 
     --main-bg-summer-color: #F0A853;
-    --river-summer-color: #144FF5;
+    --river-summer-color: #C3996C;
     
     /* block states */
     --block-unoccupied: #00000000;
