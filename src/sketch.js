@@ -288,6 +288,7 @@ function drawUI() {
   text('Press 1 to switch to pan mode', 1000, 120)
   text('Press 2 to switch to build mode', 1000, 144)
   text('Press 3 to switch to repair mode', 1000, 168)
+  text('Help', 1000, 192)
 
 }
 
@@ -441,6 +442,10 @@ function mouseClicked() {
   let pl = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
   if (pl != null && tool == 'repair') {
     neighborhood.stations[0].dispatchCrew(pl, neighborhood)
+  }
+  if (mouseY >= 192 && mouseY <= 200 && mouseX >= 1000 && mouseX <= 1030){ 
+    //range accounting for text length
+    window.open("https://docs.google.com/document/d/1f3yd-Af01pex1mGWwMqOJTgXaB0rzDGvLS7OhefFbFM/edit");
   }
 }
 function mousePressed() {
