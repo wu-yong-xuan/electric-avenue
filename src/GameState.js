@@ -52,7 +52,7 @@ class GameState {
         if (this.startupTime>0) {
             this.startupTime -= 1
         } else {
-            this.resource -= Math.round(200 * this.neighborhood.pl.length / this.cyclesPerStep)
+            this.resource -= Math.round(250 * this.neighborhood.pl.length / this.cyclesPerStep)
         }
     }
     calcArea() {
@@ -69,7 +69,7 @@ class GameState {
         this.offlineArea = Math.round(this.offlineArea)
     }
     income1() {
-        this.resource += Math.round(this.activeArea/7/this.cyclesPerStep)
+        this.resource += Math.round(this.activeArea/8/this.cyclesPerStep)
     }
 
     buyPL(length) {
