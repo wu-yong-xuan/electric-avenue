@@ -105,15 +105,21 @@ function setup() {
 function draw() {
   clear()
 
-  if (frameCount % 60 == 0) {
-    gamestate.timestep()
+  if (frameCount % 1 == 0) {
+    gamestate.timestep(async function(){
+      for (let _ = 0; _<5; _++) {
+        network.iterate(); 
+        await sleep(100)
+      } 
+      generateShapes()
+    })
   }
   if (gamestate.resource < -20000) {
     gameover()
     return
   }
   const mouse = createVector(mouseX, mouseY);
-  const relativeMouse = mouse.copy().sub(offset); //?????
+  //const relativeMouse = mouse.copy().sub(offset); //?????
   
   background(gamestate.bg)
   translate(offset.x, offset.y);
@@ -221,15 +227,22 @@ function generateShapes() {
   trimmedGraph = result.trimmedGraph
   mnw = result.metaNetwork
   shapes = result.shapes
-  neighborhood = new Neighborhood(mnw, trimmedGraph, network)
+  let tempneighborhood = new Neighborhood(mnw, trimmedGraph, network) 
 
   if (networkSettings.hasRiver) {
     shapes = shapes.filter(s => !geometric.polygonIntersectsPolygon(s.polygon.verts, river.poly))
   }
   shapes.forEach(s => {
-    neighborhood.addBlock(new Block(s))
+    tempneighborhood.addBlock(new Block(s))
   })
+  if (neighborhood == undefined) {
+    neighborhood = tempneighborhood
+  } else {
+    neighborhood.iterate(tempneighborhood)
+  }
 }
+
+
 
 function generateNetwork() {
   var ticks = ((new Date().getTime() * 10000) + 621355968000000000);
@@ -316,7 +329,7 @@ function keyReleased() {
   }
   if (tool == 'confirm-PL') {
     if (keyCode === ENTER) {
-      neighborhood.distributePower()
+      neighborhood.distributePowerAnim()
       gamestate.buyPL(ple.len)
       if (pop.powered) {pop.powerOn()}
       tool = 'select'
@@ -359,9 +372,9 @@ function keyReleased() {
 
   } else if (key == 'g') { //TEMPPPPPP
     if (deletethis > 0) {
-      let gen = new PowerGenerator((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef)
-      neighborhood.addPLine(gen)
+      gamestate.addGen((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef)
       deletethis--
+      gamestate.startClock()
     }
 
   } else if (key == 'h') { //TEMPPPPPP
@@ -376,10 +389,10 @@ function keyReleased() {
       
     }
 
-  } else if (key == 'a') {
+  }/* else if (key == 'a') {
     neighborhood.blocks.forEach(b=>b.occupied=true)
     //draw()
-  }else if (key == '1') {
+  }*/ else if (key == '1') {
     tool = 'pan'
     //draw()
   }else if (key == '2') {
@@ -388,7 +401,7 @@ function keyReleased() {
   }else if (key == '3') {
     tool = 'repair'
     //draw()
-  } else if (key == 'p') {
+  } /*else if (key == 'p') {
     pathfind+= 1
     pathfind = pathfind % 3
     if (pathfind == 0) {
@@ -412,7 +425,7 @@ function keyReleased() {
         n2.highlight()
       }
     }
-  }
+  }*/
 }
 
 function mouseClicked() {

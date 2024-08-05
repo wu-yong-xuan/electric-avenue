@@ -2,7 +2,6 @@ function detectClosedShapes(graph) {
 
     let trimmedGraph = removeDeadEnds(duplicate(graph))
     print("trimmed graph | ", trimmedGraph)
-
     let mnw = createMetaNetworkFromGraph(trimmedGraph)
     print("meta graph    | ", mnw)
 
@@ -97,7 +96,7 @@ function detectCyclesInMetaNetwork(mnw, trimmed) {
     // which is a collection of path edges, gathered in the BFS 
     let foundShapes = mnw.edges.map(me => [])
     let shapeId = 0
-    //TODO optimize, no need to check an edge who's already part of 2 shapes after all    
+    //TODO optimize, no need to check an edge who's already part of 2 shapes after all
     mnw.edges.forEach(me => {
         let cycles = detectCyclesForMetaEdge(me)
         cycles.forEach(cycle => {

@@ -10,6 +10,11 @@ class Substation {
         this.edgeout = []
         this.voltage 
     }
+    update(node) {
+        this.node = node
+        this.x = node.pos.x
+        this.y = node.pos.y
+    }
     addIn (edge) {
         this.edgein.push(edge)
     }

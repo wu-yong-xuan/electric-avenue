@@ -17,18 +17,7 @@ async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-function interpolateColor(color1, color2, factor) {
-     if (factor === undefined) {
-         factor = 0.5; 
-    } 
-    let rgb1 = hexToRgb(color1); 
-    let rgb2 = hexToRgb(color2); 
-    let r = Math.round(rgb1[0] + factor * (rgb2[0] - rgb1[0])); 
-    let g = Math.round(rgb1[1] + factor * (rgb2[1] - rgb1[1])); 
-    let b = Math.round(rgb1[2] + factor * (rgb2[2] - rgb1[2])); 
-    return rgbToHex(r, g, b); 
-}
-
+  
 function getRandom (list) {
   return list[Math.floor((Math.random()*list.length))];
 }

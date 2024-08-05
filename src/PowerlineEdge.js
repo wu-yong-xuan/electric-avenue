@@ -14,6 +14,9 @@ class PowerlineEdge {
         this.len = this.dst
     }
 
+    onIterate(){
+        this.dst = dist(this.start.x, this.start.y, this.end.x, this.end.y)
+    }
     powerOn(){
         this.powered = true
         this.end.powerOn()

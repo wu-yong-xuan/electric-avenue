@@ -26,7 +26,7 @@ class ServiceTeam {
         dest.critical = false
         if (dest.edgein.some(e => e.powered)) {
             dest.powerOn()
-            neighborhood.distributePower()
+            neighborhood.distributePowerAnim()
         }
         for (let i = path.length-1; i > 1; i--) {
             for (let j = 0; j < 5; j++) {

@@ -44,7 +44,13 @@ class Neighborhood {
     distributePower() {
         this.blocks.forEach(b=>b.distributePower(this.pl))
     }
-
+    async distributePowerAnim() {
+        for (let i = 0; i < this.blocks.length; i++) {
+            await sleep (10)
+            this.blocks[i].distributePower(this.pl)
+        }
+    }
+    
     randomFailure() {
         let p = getRandom(this.pl.filter(p=>p instanceof Powerline))
         p.critical = true
@@ -211,6 +217,33 @@ class Neighborhood {
             }
         }
         return null
+    }
+    relocate(oldnode, newNeighborhood) {
+        return newNeighborhood.getNodeFromCoords(oldnode.pos.x,oldnode.pos.y, 50)
+    }
+    iterate(newNeighborhood) {
+        newNeighborhood.blocks.forEach(b => {
+            let tmp = this.getBlockFromCoords(b.center[0],b.center[1], 30)
+            if (tmp != null) {
+                b.occupied = tmp.occupied 
+            }
+        })
+        this.blocks = newNeighborhood.blocks
+        this.mnw = newNeighborhood.mnw
+        this.trim = newNeighborhood.trim
+        this.net = newNeighborhood.net
+        this.pl.forEach(p=>{
+            if (!(p instanceof PowerGenerator)) {p.update(this.relocate(p.node, newNeighborhood))}
+            
+        })
+        this.plEdges.forEach(p=>{
+            p.onIterate()
+            if (!(p.start instanceof PowerGenerator)) {
+                p.findPath(newNeighborhood)
+            }
+        })
+        this.stations.forEach(s=>s.update(this.relocate(s.node, newNeighborhood)))
+        this.distributePower()
     }
 
     display(on='rgba(255,0,0,0.4)', off='rgba(0,0,255,0.4)') {

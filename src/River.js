@@ -211,12 +211,12 @@ class River {
     }
 
     display(color) {
-        this.nodes.forEach(n => {
+        /*this.nodes.forEach(n => {
             noStroke()
             fill('blue')
             circle(n.pos.x, n.pos.y, 3)
             // n.display()
-        })
+        })*/
         this.edges.forEach(s => {
             strokeWeight(1)
             stroke(0, 0, 255)

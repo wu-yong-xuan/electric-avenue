@@ -23,6 +23,7 @@ class Block {
             if (v.priority == r) {continue}
             powah.forEach(p=> {
                 if (p.node == v.item) {
+                    this.occupied = true
                     this.powered = true
                     p.connectBlock(this)
                     this.connectedPL.push(p)
@@ -36,17 +37,19 @@ class Block {
             })
         }
     }
-    disconnectPL (pl) {
+    async disconnectPL (pl) {
         let i = this.connectedPL.indexOf(pl)
         if (i!= -1) {
             this.connectedPL.splice(i,1)
             if (this.connectedPL.length == 0) {
+                await sleep(Math.random()*1000)
                 this.powered = false
             }
         }
     }
-    connectPL (pl) {
+    async connectPL (pl) {
         this.connectedPL.push(pl)
+        await sleep(Math.random()*1000)
         this.powered = true
     }
     getClosestNode(x, y) {

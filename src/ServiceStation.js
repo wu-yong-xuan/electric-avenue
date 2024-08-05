@@ -6,6 +6,11 @@ class ServiceStation {
         this.node = node
         this.teamsReady = 0
     }
+    update(node) {
+        this.node = node
+        this.x = node.pos.x
+        this.y = node.pos.y
+    }
     addCrew(team) {
         this.crew.push(team)
         team.joinStation(this)

@@ -13,6 +13,11 @@ class Powerline {
         this.connectedBlocks = []
         this.critical = false
     }
+    update(node) {
+        this.node = node
+        this.x = node.pos.x
+        this.y = node.pos.y
+    }
     addIn (edge) {
         this.edgein.push(edge)
     }
@@ -34,7 +39,7 @@ class Powerline {
             this.connectedBlocks.forEach(b => b.connectPL(this))
             this.edgeout.forEach(e=> e.powered = true)
             if (this.destinations.length!=0) {
-                await sleep (250)
+                await sleep (320)
                 this.destinations.forEach(d=>d.powerOn())
             }
         }
@@ -45,7 +50,7 @@ class Powerline {
             this.connectedBlocks.forEach(b => b.disconnectPL(this))
             this.edgeout.forEach(e=> e.powered = false)
             if (this.destinations.length!=0) {
-                await sleep (250)
+                await sleep (320)
                 this.destinations.forEach(d=>d.powerOff())
             }
         }

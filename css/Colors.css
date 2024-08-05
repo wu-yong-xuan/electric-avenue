@@ -30,6 +30,7 @@
 
     --transmission-line-color: #F5FF64;
     --transmission-station-color: #4CFF5D;
+    --transmission-station-failure: ????;
     /*current transmission color is a placeholder taken from fill color of generator SVGs*/
 
     /* need shapes for specific substation (step up / down) */
@@ -37,14 +38,30 @@
     --substation-crit-color: #FF6D00;
     --substation-fail-color: #FF1143;
     /* power generators */
-    --hydro-generator-color: ???;
+    --generator-active: ??;
+    --generator-crit: ??;
+    --generator-fail: ??;
+    /*-hydro-generator-color: ???;
     --nuclear-generator-color: ???;
     --solar-generator-color: ???;
     --wind-generator-color: ???;
-    --fossil-generator-color: ???;
+    --fossil-generator-color: ???;*/
+    
+
+    
 
     /* Feel free to add any extra color variables you can think of
     Here is an example of how to add one */
     --variable: chartreuse;
 
   }
+  /*
+  RANDOM INFO
+
+  Line width for roads = 4
+
+
+
+
+
+  */
