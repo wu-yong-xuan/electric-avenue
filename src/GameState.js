@@ -52,7 +52,7 @@ class GameState {
         if (this.startupTime>0) {
             this.startupTime -= 1
         } else {
-            this.resource -= Math.round(250 * this.neighborhood.pl.length / this.cyclesPerStep)
+            this.resource -= Math.round(200 * this.neighborhood.pl.length / this.cyclesPerStep)
         }
     }
     calcArea() {
@@ -69,7 +69,7 @@ class GameState {
         this.offlineArea = Math.round(this.offlineArea)
     }
     income1() {
-        this.resource += Math.round(this.activeArea/8/this.cyclesPerStep)
+        this.resource += Math.round(this.activeArea/7/this.cyclesPerStep)
     }
 
     buyPL(length) {
@@ -91,12 +91,12 @@ class GameState {
     }
     failure() {
         let r = Math.random()
-        if (r < this.load / 2000000 / this.cyclesPerStep) {
+        if (r < this.load / 1000000 / this.cyclesPerStep) {
             print(this.load, r)
             print(this.load/1000000)
             neighborhood.randomFailure()
         }
-        if (r < this.offlineArea / 2500000 / this.cyclesPerStep) {
+        if (r < this.offlineArea / 1000000 / this.cyclesPerStep) {
             print(this.load, r)
             print(this.load/1000000)
             neighborhood.randomFailure()
@@ -112,6 +112,9 @@ class GameState {
             this.costfn()
             this.incomefn()
             this.failure()
+            if (this.season=='summer' || this.season=='winter') {
+                this.failure()
+            }
             if (this.step% (60*this.cyclesPerStep) == 0) {
                 this.nextSeason(this.season)
                 iteratenet()

@@ -181,6 +181,12 @@ class Neighborhood {
                 fringe.push(p, dst)
             }
         })
+        this.stations.forEach(p => {
+            let dst = dist(x, y, p.x, p.y)
+            if (dst <= radius) {
+                fringe.push(p, dst)
+            }
+        })
         let out = fringe.pop()
         if (out == null) {return null}
         return out.item

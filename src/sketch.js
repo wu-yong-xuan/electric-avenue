@@ -460,7 +460,7 @@ function mouseReleased() {
   }
   if (dragging) {
     //draw()
-    if (tool == 'select') {
+    if (tool == 'select' && !(selectedPL instanceof ServiceStation)) {
       let n = neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,50)
       if (n!=null) {
         let _add = true
@@ -501,6 +501,11 @@ function mouseReleased() {
       //draw()
        }
       } 
+    } else if (tool == 'select' && (selectedPL instanceof ServiceStation)) {
+        let plee = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,20)
+        if (plee != null) {
+          selectedPL.dispatchCrew(plee, neighborhood)
+        }
     }
 
   }
