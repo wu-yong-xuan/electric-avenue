@@ -289,6 +289,10 @@ function drawUI() {
   text('Press 2 to switch to build mode', 1000, 144)
   text('Press 3 to switch to repair mode', 1000, 168)
   text('Help', 1000, 192)
+  stroke(1)
+  strokeWeight(1)
+  stroke(255)
+  line(1000, 198, 1028, 198)
 
 }
 
