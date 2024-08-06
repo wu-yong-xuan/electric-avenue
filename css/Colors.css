@@ -17,7 +17,7 @@
     --river-summer-color: #C3996C;
     
     /* block states */
-    --block-unoccupied: #00000000;
+    --block-unoccupied: #A2A2A2;
     --block-powered: #4CFF5D;
     --block-unpowered: #D71F3D;
 
