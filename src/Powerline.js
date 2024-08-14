@@ -12,6 +12,7 @@ class Powerline {
         this.edgeout = []
         this.connectedBlocks = []
         this.critical = false
+        this.active = false
     }
     update(node) {
         this.node = node
@@ -34,6 +35,7 @@ class Powerline {
         this.connectedBlocks.push(block)
     }
     async powerOn() {
+        if (!this.active) {return}
         if (!this.powered && !this.critical) {
             this.powered = true
             this.connectedBlocks.forEach(b => b.connectPL(this))
@@ -45,6 +47,7 @@ class Powerline {
         }
     }
     async powerOff(){
+        if (!this.active) {return}
         if (this.powered && (!this.edgein.some(e=>e.powered) || this.critical)) {
             this.powered = false
             this.connectedBlocks.forEach(b => b.disconnectPL(this))

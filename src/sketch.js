@@ -1,4 +1,5 @@
 // <reference path="../node_modules/@types/p5/global.d.ts" />
+IMGDIR = '../data/img/'
 
 let mnw
 let network
@@ -23,16 +24,33 @@ let gamestate
 let pCost = 0
 let pop 
 let ple
-
 let deletethis = 1
 let deletee = 1
 let gameOver = false
+let info = ''
+let desc = ''
+let pos = [0,0]
+let confirmFn
+let cancelFn
+let confirmimg = null
 
 function preload() {
   networkSettings = loadJSON("data/nws_decent.json")
+  
+  font = loadFont('../font/D-DINExp.otf')
+  logo = loadImage(IMGDIR + 'TITLE.svg')
+  boldfont = loadFont('../font/D-DINExp-Bold.otf')
+  board = loadImage(IMGDIR + 'BACKBOARD.svg')
+  bolt = loadImage(IMGDIR + 'BOLT.svg')
+  repair = loadImage(IMGDIR + 'REPAIR.svg')
+  pan = loadImage(IMGDIR + 'PAN.svg')
+  help = loadImage(IMGDIR + 'HELP.svg')
+  hydro = loadImage(IMGDIR + 'HYDRO.svg')
+  service = loadImage(IMGDIR + 'SERVICE TRUCK.svg')
 }
 
 function setup() {
+  textFont(font)
   colors = new Map()
   colors.set('fall', {
       bg: getComputedStyle(document.documentElement).getPropertyValue('--main-bg-fall-color'), 
@@ -52,7 +70,8 @@ function setup() {
     })
   colors.set('block', {
       on: getComputedStyle(document.documentElement).getPropertyValue('--block-powered'), 
-      off: getComputedStyle(document.documentElement).getPropertyValue('--block-unpowered')
+      off: getComputedStyle(document.documentElement).getPropertyValue('--block-unpowered'),
+      unoccupied: getComputedStyle(document.documentElement).getPropertyValue('--block-unoccupied')
   })
   colors.set('road', {
     color: getComputedStyle(document.documentElement).getPropertyValue('--road-color'), 
@@ -66,7 +85,8 @@ function setup() {
   })
   
 
-  createCanvas(1280, 640, P2D)
+  //createCanvas(1280, 640, P2D)
+  createCanvas(windowWidth, windowHeight)
   offset = createVector(0, -200);
   window.addEventListener("wheel", e => {
     const s = 1 - (e.deltaY / 1000);
@@ -104,7 +124,6 @@ function setup() {
 
 function draw() {
   clear()
-
   if (frameCount % 1 == 0) {
     gamestate.timestep(async function(){
       for (let _ = 0; _<5; _++) {
@@ -125,7 +144,7 @@ function draw() {
   translate(offset.x, offset.y);
   scale(scalef)
   river.display(gamestate.riverColor)
-  neighborhood.display(gamestate.colorScheme.get('block').on, gamestate.colorScheme.get('block').off)
+  neighborhood.display(gamestate.colorScheme.get('block').on, gamestate.colorScheme.get('block').off, gamestate.colorScheme.get('block').unoccupied)
   network.display({ showNodes: false }, gamestate.colorScheme.get('road').color)
   
 
@@ -148,11 +167,17 @@ function draw() {
     responseCurves.display()
   }
   neighborhood.drawPL(gamestate.colorScheme.get('road').transmission)
-  if (dragging && tool == 'select') {
-    //draw()
-    strokeWeight(3)
-    stroke('black')
-    line(selectedPL.x,selectedPL.y, (mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef);
+  if (dragging) { 
+    if  (tool == 'select'){
+      //draw()
+      strokeWeight(3)
+      stroke('black')
+      line(selectedPL.x,selectedPL.y, (mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef);
+    } else if (tool == 'repair') {
+      image(repair, ((mouseX - offset.x) / scalef)-10.5, ((mouseY - offset.y) / scalef)-10.5, 21, 21, 0, 0, repair.width, repair.height, 'CONTAIN')
+    } else if (tool == 'build') {
+      image(hydro, ((mouseX - offset.x) / scalef)-10.5, ((mouseY - offset.y) / scalef)-10.5, 21, 21, 0, 0, repair.width, repair.height, 'CONTAIN')
+    }
   }
   drawUI()
 
@@ -266,9 +291,35 @@ function drawUI() {
   translate(-offset.x, -offset.y);
   stroke(0)
   strokeWeight(0)
-  fill(255);
   textSize(12);
   textAlign(LEFT, CENTER);
+  
+  image(board, 46, 83)
+  image(logo,61,23)//, 61 + logo.width/3, 43 + logo.height/3, 0, 0, logo.width, logo.height, 'CONTAIN')
+  
+  fill(0);
+  textFont(boldfont)
+  textAlign(RIGHT, CENTER)
+  text('Date:', 176,170)
+  text('Income: ', 176, 190 )
+  text('Cost: ', 176, 210)
+  text('Money: ', 176, 230)
+  text(gamestate.info, 176, 250)
+  fill(255)
+  textAlign(LEFT,CENTER)
+  text(gamestate.date, 184,170)
+  text(gamestate.income, 184, 190 )
+  text(gamestate.cost, 184, 210)
+  text(gamestate.resource, 184, 230)
+  text(gamestate.desc, 184, 250)
+  textFont(font)
+
+  image(bolt, 29, windowHeight-114, 84, 84, 0, 0, bolt.width, bolt.height, 'CONTAIN')
+  image(repair, 112+29, windowHeight-114, 84, 84, 0, 0, repair.width, repair.height, 'CONTAIN')
+  image(pan, 112*2 + 29, windowHeight-114, 84, 84, 0, 0, pan.width, pan.height, 'CONTAIN')
+  image(help, 112*3 + 29, windowHeight-114, 84, 84, 0, 0, help.width, help.height, 'CONTAIN')
+
+/*
   if (selectedBlockID != undefined) {
     text(`Block ID: ${selectedBlockID}`, 300,24)
     text(`Center Coords: ${Math.round(selectedBlock.center[0])}, ${Math.round(selectedBlock.center[1])}`,400,24)
@@ -277,11 +328,18 @@ function drawUI() {
   }
   text(`Resources: ${gamestate.resource}`,800,24)
   text(`Projected Cost: ${pCost}`,1000,24)
-  if (tool == 'confirm-PL') {
-    text('press ENTER to confirm or ESC to cancel', 600,48)
-    text(`Remaining Resouces: ${gamestate.resource-pCost}`, 1000,48)
+  */
+  if (tool == 'confirm' ) {
+    text('press ENTER to confirm or ESC to cancel', 61,320)
+    text(`Remaining Resouces: ${gamestate.resource-pCost}`, 61,340)
+    let confx = pos[0]*scalef +  offset.x
+    let confy =  pos[1] + scalef + offset.y
+    if (confimg != null) {
+      image(confimg, confx-10.5, confy-10.5, 21, 21, 0, 0, confimg.width, confimg.height, 'CONTAIN')
+    }  
   }
 
+  /*
   // TEMPORARY
   text('Press G to place a generator (only 1)', 1000, 72)
   text('Press H to place a service station (only 1)', 1000, 96)
@@ -293,6 +351,7 @@ function drawUI() {
   strokeWeight(1)
   stroke(255)
   line(1000, 198, 1028, 198)
+  */
 
 }
 
@@ -332,10 +391,19 @@ function keyReleased() {
   if (gameOver) {
     return
   }
-  if (tool == 'confirm-PL') {
+  if (tool == 'confirm') {
+    if (keyCode === ENTER) {
+      confirmFn()
+      confimg=null
+    } else if (keyCode === ESCAPE) {
+      cancelFn()
+      confimg=null
+  }
+  }
+  /*if (tool == 'confirm-PL') {
     if (keyCode === ENTER) {
       neighborhood.distributePowerAnim()
-      gamestate.buyPL(ple.len)
+      gamestate.buyPL(ple.len, pop)
       if (pop.powered) {pop.powerOn()}
       tool = 'select'
       pCost = 0
@@ -345,7 +413,30 @@ function keyReleased() {
       tool = 'select'
       pCost = 0
   }
-} else if (key == 'r') {
+} else if (tool = 'confirm-Gen') {
+  if (keyCode === ENTER) {
+    gamestate.addGen(pos[0],pos[1],hydro)
+    gamestate.startClock()
+    tool = 'select'
+    pCost = 0
+  } else if (keyCode === ESCAPE) {
+    tool = 'select'
+    pCost = 0
+}
+
+} else if (tool = 'confirm-Rep') {
+  if (keyCode === ENTER) {
+    let station = new ServiceStation(n, repair, service)
+        neighborhood.addStation(station)
+        station.addCrew(new ServiceTeam())
+    tool = 'select'
+    pCost = 0
+  } else if (keyCode === ESCAPE) {
+    tool = 'select'
+    pCost = 0
+} 
+}*/
+/*else if (key == 'r') {
     generateNetwork()
     generateShapes()
     loop()
@@ -394,10 +485,10 @@ function keyReleased() {
       
     }
 
-  }/* else if (key == 'a') {
+  } else if (key == 'a') {
     neighborhood.blocks.forEach(b=>b.occupied=true)
     //draw()
-  }*/ else if (key == '1') {
+  } else if (key == '1') {
     tool = 'pan'
     //draw()
   }else if (key == '2') {
@@ -406,7 +497,8 @@ function keyReleased() {
   }else if (key == '3') {
     tool = 'repair'
     //draw()
-  } /*else if (key == 'p') {
+  }*/
+     /*else if (key == 'p') {
     pathfind+= 1
     pathfind = pathfind % 3
     if (pathfind == 0) {
@@ -430,12 +522,21 @@ function keyReleased() {
         n2.highlight()
       }
     }
-  }*/
+  } */
 }
 
 function mouseClicked() {
   if (gameOver) {
     return
+  }
+  if (dist(mouseX, mouseY, 112*0+29+42, windowHeight-114+42) < 42) {
+    tool = 'build'
+  } else if (dist(mouseX, mouseY, 112*1+29+42, windowHeight-114+42) < 42) {
+    tool = 'select'
+  } else if (dist(mouseX, mouseY, 112*2+29+42, windowHeight-114+42) < 42) {
+    tool = 'pan'
+  } else if (dist(mouseX, mouseY, 112*3+29+42, windowHeight-114+42) < 42) {
+    tool = ''
   }
   let block = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
   if (block != null && tool == 'select') {
@@ -460,8 +561,13 @@ function mousePressed() {
   if (pl != null) {
     selectedPL = pl
     dragging = true
+  } else if ((dist(mouseX, mouseY, 112*1+29+42, windowHeight-114+42) < 42)) {
+    dragging = true
+    tool = 'repair'
+  } else if ((dist(mouseX, mouseY, 112*0+29+42, windowHeight-114+42) < 42)) {
+    dragging = true
+    tool = 'build'
   }
-  
 }
 function mouseReleased() {
   if (gameOver) {
@@ -504,7 +610,22 @@ function mouseReleased() {
               neighborhood.rmPLineEdge(ple)
             }
           } else {
-            tool = 'confirm-PL'
+            tool = 'confirm'
+            confimg = null
+            confirmFn = function() { 
+              neighborhood.distributePowerAnim()
+              gamestate.buyPL(ple.len, pop)
+              if (pop.powered) {pop.powerOn()}
+              tool = 'select'
+              pCost = 0
+            }
+            cancelFn = function() {
+              if (pop.sources.length + pop.destinations.length <= 2) {neighborhood.rmPLine(pop)}
+              neighborhood.rmPLineEdge(ple)
+              tool = 'select'
+              pCost = 0
+          }
+           
           }
 
       //draw()
@@ -515,6 +636,54 @@ function mouseReleased() {
         if (plee != null) {
           selectedPL.dispatchCrew(plee, neighborhood)
         }
+    } else if (tool == 'build') {
+      if (gamestate.resource > 4000) {
+        tool = 'confirm'
+        if (gamestate.numGens != 0) { pCost = 4000}
+        pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
+        confimg = hydro
+        confirmFn = function() {
+          gamestate.addGen(pos[0],pos[1],hydro)
+          gamestate.startClock()
+          tool = 'select'
+          pCost = 0
+        } 
+        cancelFn = function() {
+          tool = 'select'
+          pCost = 0
+        }
+      } else {
+        gamestate.info = ''
+        tool = 'select'
+        pCost = 0
+        gamestate.desc = 'TOO EXPENSIVE'
+      }
+    } else if (tool = 'repair') {
+      if (gamestate.resource > 3000) { 
+        let n = neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,50)
+        if (n!= null) {
+          pos = [n.pos.x, n.pos.y]
+          tool = 'confirm'
+          confimg = repair
+          pCost=3000
+        }
+        confirmFn = function() { 
+          let station = new ServiceStation(n, repair, service)
+          gamestate.addStation(station)
+          station.addCrew(new ServiceTeam())      
+          tool = 'select'
+          pCost = 0
+        } 
+        cancelFn = function() {
+          tool = 'select'
+          pCost = 0
+        }
+      } else {
+        gamestate.info = ''
+        gamestate.desc = 'TOO EXPENSIVE'
+        tool = 'select'
+        pCost = 0
+      }
     }
 
   }
@@ -533,6 +702,9 @@ function mouseDragged() {
 //     line(selectedPL.x,selectedPL.y, mouseX, mouseY);
 //   }
  }
+ function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
 
  
 

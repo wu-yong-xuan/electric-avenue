@@ -65,7 +65,7 @@ class Block {
         return closest
     }
 
-    display(on, off) {
+    display(on, off, unoc) {
         //this.poly.display('#2d5425', false)
         if (this.occupied) {
             if (!this.powered) {
@@ -74,7 +74,7 @@ class Block {
                 this.poly.display(on, false)
             }
         } else {
-            this.poly.display('rgba(255,255,255,.3)', false)
+            this.poly.display(unoc, false)
         }
         // text(this.id, this.polygon.centerBB.x, this.polygon.centerBB.y)
     }

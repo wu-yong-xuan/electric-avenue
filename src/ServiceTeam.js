@@ -8,6 +8,7 @@ class ServiceTeam {
 
     joinStation(station) {
         this.station = station
+        this.img = station.crewImg
     }
 
     async dispatch(dest, neighborhood) { //dest is a Pline
@@ -40,8 +41,9 @@ class ServiceTeam {
     }
 
     display() {
-        noStroke()
-        fill('grey')
-        circle(this.x, this.y, 10)
+        image(this.img, this.x-10.5,this.y-10.5,21,21,0,0,this.img.width,this.img.height,'CONTAIN')
+        //noStroke()
+        //fill('grey')
+        //circle(this.x, this.y, 10)
     }
 }

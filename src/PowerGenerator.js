@@ -1,5 +1,5 @@
 class PowerGenerator {
-    constructor(x, y) {
+    constructor(x, y, img) {
         this.x = x
         this.y = y
         this.powered = true
@@ -7,6 +7,7 @@ class PowerGenerator {
         this.output
         this.dest = []
         this.edgeout = []
+        this.img = img
     }
     addOut(e) {
         this.edgeout.push(e)
@@ -34,10 +35,11 @@ class PowerGenerator {
             }
         }
     }
-    display() {
-        noStroke()
-        fill('purple')
-        circle(this.x, this.y, 20)
+    display() { 
+        image(this.img, this.x-10.5,this.y-10.5, 21,21,0,0,84,84,'CONTAIN')
+        //noStroke()
+        //fill('purple')
+        //circle(this.x, this.y, 20)
     }
 
 

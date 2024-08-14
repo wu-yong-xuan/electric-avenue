@@ -1,10 +1,12 @@
 class ServiceStation {
-    constructor(node) {
+    constructor(node, imgsta, imgcre) {
         this.crew = []
         this.x = node.pos.x
         this.y = node.pos.y
         this.node = node
         this.teamsReady = 0
+        this.img = imgsta
+        this.crewImg = imgcre
     }
     update(node) {
         this.node = node
@@ -22,9 +24,10 @@ class ServiceStation {
     }
 
     display() {
-        noStroke()
-        fill('blue')
-        circle(this.x, this.y, 10)
+        image(this.img,this.x-10.5,this.y-10.5,21,21,0,0,this.img.width,this.img.height,'CONTAIN')
+        //noStroke()
+        //fill('blue')
+        //circle(this.x, this.y, 10)
         this.crew.forEach(c=>{
             if(c.enroute) {
                 c.display()
