@@ -12,6 +12,12 @@ class Block {
         this.center = geometric.polygonCentroid(this.verts)
         this.connectedPL = []
         this.area = geometric.polygonArea(this.verts)
+        this.timeUnpowered = -1
+        if (Math.random() < 0.3) {
+            this.type = 'Industrial'
+        } else {
+            this.type = 'Residential'
+        }
     }
     distributePower(powerlines, r = 3){ //input a list of powerlines
         let powah = powerlines.filter(p => p.powered == true && !(p instanceof Substation))
@@ -44,6 +50,7 @@ class Block {
             if (this.connectedPL.length == 0) {
                 await sleep(Math.random()*1000)
                 this.powered = false
+                this.timeUnpowered = 0
             }
         }
     }
@@ -51,7 +58,24 @@ class Block {
         this.connectedPL.push(pl)
         await sleep(Math.random()*1000)
         this.powered = true
+        this.timeUnpowered = -1
     }
+    decay() {
+        if (this.powered == true) {
+            this.timeUnpowered = -1
+            return
+        }
+        if (this.timeUnpowered == -1 && this.powered == false == this.occupied == true) {
+            this.timeUnpowered = 0
+        }
+        if (this.timeUnpowered == -1) {return}
+        this.timeUnpowered++
+        if (this.timeUnpowered >= 60) {
+            this.occupied = false
+            this.timeUnpowered = -1
+        }
+    }
+
     getClosestNode(x, y) {
         let closest = this.nodes[0]
         let min = dist(x,y,closest.pos.x,closest.pos.y)
@@ -67,18 +91,59 @@ class Block {
 
     display(on, off, unoc) {
         //this.poly.display('#2d5425', false)
+        if (this.type == 'Industrial') {
+            if (this.occupied) {
+                if (!this.powered) {
+                    this.displayhelper(off, true)
+                } else {
+                    this.displayhelper(on, true)
+                }
+            } else {
+                this.displayhelper(unoc, true)
+            }
+            return
+        }
         if (this.occupied) {
             if (!this.powered) {
-                this.poly.display(off, false)
+                this.displayhelper(off, false)
             } else {
-                this.poly.display(on, false)
+                this.displayhelper(on, false)
             }
         } else {
-            this.poly.display(unoc, false)
+            this.displayhelper(unoc, false)
         }
         // text(this.id, this.polygon.centerBB.x, this.polygon.centerBB.y)
     }
 
+
+    displayhelper(col, ispattern) {
+        if (ispattern) {
+            patternAngle(PI/4)
+            let colo = color(col)
+            pattern(PTN.stripe(8))
+            noStroke()
+            beginShapePattern()
+            // stroke('red')
+            patternColors([colo, lerpColor(colo,color('white'),0.2)])
+            this.verts.forEach(v => {
+                vertexPattern(v[0], v[1])
+            })
+            endShapePattern()
+        } else {
+            noStroke()
+            beginShape()
+            // stroke('red')
+            if (col != undefined) {
+                fill(col)
+            } else {
+                fill(255, 228, 181, 128)
+            }
+            this.verts.forEach(v => {
+                vertex(v[0], v[1])
+            })
+            endShape()
+        }
+    }
 
 
 }

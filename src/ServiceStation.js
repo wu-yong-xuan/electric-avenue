@@ -7,6 +7,7 @@ class ServiceStation {
         this.teamsReady = 0
         this.img = imgsta
         this.crewImg = imgcre
+        this.queue = []
     }
     update(node) {
         this.node = node
@@ -18,9 +19,13 @@ class ServiceStation {
         team.joinStation(this)
         this.teamsReady++
     }
-    async dispatchCrew(dest, neighborhood) {
-        this.teamsReady--
-        this.crew.filter(c=> !c.enroute)[0].dispatch(dest, neighborhood)
+    async dispatchCrew(dest, neighborhood, sound=null, gs) {
+        if (this.teamsReady > 0) {
+            this.teamsReady--
+            this.crew.filter(c=> !c.enroute)[0].dispatch(dest, neighborhood, sound, gs)
+        } else if (this.queue.length < 5 * this.crew.length) {
+            this.queue.push([dest, neighborhood, sound])
+        }
     }
 
     display() {

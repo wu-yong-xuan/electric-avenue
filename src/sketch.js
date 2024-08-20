@@ -1,12 +1,13 @@
 // <reference path="../node_modules/@types/p5/global.d.ts" />
 IMGDIR = '../data/img/'
-
+SNDDIR = '../data/sound/'
 let mnw
 let network
 let trimmedGraph
 let river
 let shapes = []
 let neighborhood 
+let cityData = []
 let plots = []
 let qtPlots
 let clipper
@@ -24,15 +25,17 @@ let gamestate
 let pCost = 0
 let pop 
 let ple
-let deletethis = 1
-let deletee = 1
 let gameOver = false
 let info = ''
 let desc = ''
 let pos = [0,0]
 let confirmFn
 let cancelFn
-let confirmimg = null
+let confimg = null
+let confx, confy 
+let annoyingconf = false
+let loading = 2
+let progress
 
 function preload() {
   networkSettings = loadJSON("data/nws_decent.json")
@@ -47,6 +50,13 @@ function preload() {
   help = loadImage(IMGDIR + 'HELP.svg')
   hydro = loadImage(IMGDIR + 'HYDRO.svg')
   service = loadImage(IMGDIR + 'SERVICE TRUCK.svg')
+  confirmimg = loadImage(IMGDIR + 'HELP.svg')
+  cancelimg = loadImage(IMGDIR + 'HELP.svg')
+  powerDownSounds = []
+  for (let i = 1; i <=3; i++) {
+    powerDownSounds.push(loadSound(SNDDIR + '0'+i+'.mp3'))
+  }
+  repairSound = loadSound(SNDDIR + 'REPAIR.mp3')
 }
 
 function setup() {
@@ -112,25 +122,43 @@ function setup() {
   generateNetwork()
   let graph = { nodes: network.nodes, edges: network.edges }
 
-  generateShapes()
+  neighborhood = generateShapes()
   generatePlots()
 
   clipper = new ClipperLib.Clipper();
-  gamestate = new GameState(neighborhood, colors)
+  gamestate = new GameState(neighborhood, colors, powerDownSounds)
 
   // DELETE THIS LATER
-  neighborhood.blocks.forEach(b=>b.occupied=true)
+  neighborhood.blocks.forEach(b=>{b.occupied=true; b.timeUnpowered = 0})
 }
 
 function draw() {
   clear()
+  if (loading == 2) {
+    loadCity()
+    return
+  }else if (loading == 1) {
+    background('Grey')
+    stroke(0)
+    strokeWeight(1)
+    fill(0);
+    textAlign(CENTER, CENTER)
+    textSize(24);
+    text(progress, windowWidth/2, windowHeight/2)
+    return
+  } 
   if (frameCount % 1 == 0) {
     gamestate.timestep(async function(){
       for (let _ = 0; _<5; _++) {
         network.iterate(); 
         await sleep(100)
       } 
-      generateShapes()
+      let tempneighborhood = cityData.shift()
+      if (neighborhood == undefined) {
+        neighborhood = tempneighborhood
+      } else {
+        neighborhood.iterate(tempneighborhood)
+      }
     })
   }
   if (gamestate.resource < -20000) {
@@ -187,6 +215,22 @@ function draw() {
   // network.stats()   
   
   //noLoop()
+}
+
+async function loadCity() {
+  loading = 1
+  for (let i = 0; i < 12; i++) {
+    network.iterate();
+    network.iterate();
+    network.iterate();
+    network.iterate();
+    network.iterate();
+    progress = "LOADING "+ (i+1) + '/12'
+    await sleep(100)
+    cityData.push(generateShapes())
+  }
+  loading = 0
+  generateNetwork()
 }
 
 function connectOuterDeadEnds() {
@@ -260,11 +304,7 @@ function generateShapes() {
   shapes.forEach(s => {
     tempneighborhood.addBlock(new Block(s))
   })
-  if (neighborhood == undefined) {
-    neighborhood = tempneighborhood
-  } else {
-    neighborhood.iterate(tempneighborhood)
-  }
+  return tempneighborhood
 }
 
 
@@ -308,9 +348,16 @@ function drawUI() {
   fill(255)
   textAlign(LEFT,CENTER)
   text(gamestate.date, 184,170)
-  text(gamestate.income, 184, 190 )
-  text(gamestate.cost, 184, 210)
-  text(gamestate.resource, 184, 230)
+  if (gamestate.income < 0) {
+    fill(colors.get('block').off)
+    text(gamestate.income, 184, 190 )
+    fill(255)
+  } else {
+    text('$'+gamestate.income, 184, 190 )
+  }
+  
+  text('-$'+gamestate.cost, 184, 210)
+  text('$'+gamestate.resource, 184, 230)
   text(gamestate.desc, 184, 250)
   textFont(font)
 
@@ -330,13 +377,21 @@ function drawUI() {
   text(`Projected Cost: ${pCost}`,1000,24)
   */
   if (tool == 'confirm' ) {
-    text('press ENTER to confirm or ESC to cancel', 61,320)
-    text(`Remaining Resouces: ${gamestate.resource-pCost}`, 61,340)
-    let confx = pos[0]*scalef +  offset.x
-    let confy =  pos[1] + scalef + offset.y
+    confx = pos[0]*scalef +  offset.x
+    confy =  pos[1] * scalef + offset.y
     if (confimg != null) {
-      image(confimg, confx-10.5, confy-10.5, 21, 21, 0, 0, confimg.width, confimg.height, 'CONTAIN')
-    }  
+      annoyingconf = true
+      image(confimg, confx-10.5*scalef, confy-10.5*scalef, 21*scalef, 21*scalef, 0, 0, confimg.width, confimg.height, 'CONTAIN')
+      image(confirmimg,  confx - 12.5 - 10.5, confy-10.5 + 4 + 21*scalef, 21, 21, 0, 0, confirmimg.width, confirmimg.height, 'CONTAIN')
+      image(cancelimg,  confx  + 12.5 - 10.5, confy-10.5 + 4 + 21*scalef, 21, 21, 0, 0, cancelimg.width, cancelimg.height, 'CONTAIN')
+    } else {
+      annoyingconf = false
+      image(confirmimg,  confx-10.5 - 12.5 , confy-10.5 + 25 , 21, 21, 0, 0, confirmimg.width, confirmimg.height, 'CONTAIN')
+      image(cancelimg,  confx -10.5 + 12.5 , confy-10.5 + 25 , 21, 21, 0, 0, cancelimg.width, cancelimg.height, 'CONTAIN')
+    }
+   // text('press ENTER to confirm or ESC to cancel', 61,320)
+   // text(`Remaining Resouces: ${gamestate.resource-pCost}`, 61,340)
+    
   }
 
   /*
@@ -358,6 +413,7 @@ function drawUI() {
 function gameover() {
   clear()
   gameOver = true
+  gamestate.active = false
   background('white')
   // scale(1/scalef)
   // translate(-offset.x, -offset.y);
@@ -391,15 +447,7 @@ function keyReleased() {
   if (gameOver) {
     return
   }
-  if (tool == 'confirm') {
-    if (keyCode === ENTER) {
-      confirmFn()
-      confimg=null
-    } else if (keyCode === ESCAPE) {
-      cancelFn()
-      confimg=null
-  }
-  }
+  
   /*if (tool == 'confirm-PL') {
     if (keyCode === ENTER) {
       neighborhood.distributePowerAnim()
@@ -529,6 +577,25 @@ function mouseClicked() {
   if (gameOver) {
     return
   }
+  if (tool == 'confirm') {
+    if (annoyingconf == false) {
+      if (dist(mouseX, mouseY, confx-12.5, confy+25) < 10.5) {
+        confirmFn()
+        confimg=null
+      } else if (dist(mouseX, mouseY, confx+ 12.5, confy+25) < 10.5) {
+        cancelFn()
+        confimg=null
+      }
+    } else if (annoyingconf == true) {
+      if (dist(mouseX, mouseY, confx - 12.5 , confy + 4 + 21*scalef) < 10.5) {
+        confirmFn()
+        confimg=null
+      } else if (dist(mouseX, mouseY,confx + 12.5 , confy +4 + 21*scalef) < 10.5) {
+        cancelFn()
+        confimg=null
+      }
+    }
+   }
   if (dist(mouseX, mouseY, 112*0+29+42, windowHeight-114+42) < 42) {
     tool = 'build'
   } else if (dist(mouseX, mouseY, 112*1+29+42, windowHeight-114+42) < 42) {
@@ -536,25 +603,25 @@ function mouseClicked() {
   } else if (dist(mouseX, mouseY, 112*2+29+42, windowHeight-114+42) < 42) {
     tool = 'pan'
   } else if (dist(mouseX, mouseY, 112*3+29+42, windowHeight-114+42) < 42) {
-    tool = ''
+    window.open("help.html");
   }
   let block = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
-  if (block != null && tool == 'select') {
-    selectedBlock = block
-    selectedBlockID = neighborhood.getBlockID(block)
-    drawUI()
-  }
+  // if (block != null && tool == 'select') {
+  //   selectedBlock = block
+  //   selectedBlockID = neighborhood.getBlockID(block)
+  //   drawUI()
+  // }
   let pl = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
-  if (pl != null && tool == 'repair') {
-    neighborhood.stations[0].dispatchCrew(pl, neighborhood)
-  }
-  if (mouseY >= 192 && mouseY <= 200 && mouseX >= 1000 && mouseX <= 1030){ 
-    //range accounting for text length
-    window.open("https://docs.google.com/document/d/1f3yd-Af01pex1mGWwMqOJTgXaB0rzDGvLS7OhefFbFM/edit");
-  }
+  // if (pl != null && tool == 'repair') {
+  //   neighborhood.stations[0].dispatchCrew(pl, neighborhood)
+  // }
+  // if (mouseY >= 192 && mouseY <= 200 && mouseX >= 1000 && mouseX <= 1030){ 
+  //   //range accounting for text length
+  //   window.open("https://docs.google.com/document/d/1f3yd-Af01pex1mGWwMqOJTgXaB0rzDGvLS7OhefFbFM/edit");
+  // }
 }
 function mousePressed() {
-  if (gameOver) {
+  if (gameOver || tool == 'confirm') {
     return
   }
   let pl = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
@@ -579,6 +646,12 @@ function mouseReleased() {
       let n = neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,50)
       if (n!=null) {
         let _add = true
+        if (neighborhood.stations.some(s => 
+          (dist(s.x,s.y,(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef) < 10)
+        )) { 
+          dragging = false
+          return
+        }
         if (neighborhood.pl.some(p => {
           if (p.node == n) {
             pop = p
@@ -586,7 +659,7 @@ function mouseReleased() {
             return true 
           }
         })) {
-          if (pop instanceof Substation) {
+          if (pop instanceof Substation || selectedPL instanceof PowerGenerator) {
             dragging = false  
             return
           }
@@ -604,14 +677,17 @@ function mouseReleased() {
           neighborhood.addPLineEdge(ple)
           pCost = gamestate.powerlineCost(ple.len)
           if (pCost > gamestate.resource) {
-            pCost = String(pCost) + '\nTOO EXPENSIVE'
+            //pCost = String(pCost) + '\nTOO EXPENSIVE'
+            gamestate.info = 'insufficient funds'
+            gamestate.desc = '$'+pCost
             if (_add) { 
               neighborhood.rmPLine(pop)
-              neighborhood.rmPLineEdge(ple)
             }
+            neighborhood.rmPLineEdge(ple)
           } else {
-            tool = 'confirm'
             confimg = null
+            pos = [pop.x,pop.y]
+            tool = 'confirm'
             confirmFn = function() { 
               neighborhood.distributePowerAnim()
               gamestate.buyPL(ple.len, pop)
@@ -620,7 +696,7 @@ function mouseReleased() {
               pCost = 0
             }
             cancelFn = function() {
-              if (pop.sources.length + pop.destinations.length <= 2) {neighborhood.rmPLine(pop)}
+              if (pop.sources.length + pop.destinations.length <= 1) {neighborhood.rmPLine(pop)}
               neighborhood.rmPLineEdge(ple)
               tool = 'select'
               pCost = 0
@@ -634,11 +710,11 @@ function mouseReleased() {
     } else if (tool == 'select' && (selectedPL instanceof ServiceStation)) {
         let plee = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,20)
         if (plee != null) {
-          selectedPL.dispatchCrew(plee, neighborhood)
+          selectedPL.dispatchCrew(plee, neighborhood, repairSound, gamestate)
         }
     } else if (tool == 'build') {
       if (gamestate.resource > 4000) {
-        tool = 'confirm'
+        
         if (gamestate.numGens != 0) { pCost = 4000}
         pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
         confimg = hydro
@@ -652,19 +728,20 @@ function mouseReleased() {
           tool = 'select'
           pCost = 0
         }
+        tool = 'confirm'
       } else {
         gamestate.info = ''
         tool = 'select'
         pCost = 0
-        gamestate.desc = 'TOO EXPENSIVE'
+        gamestate.desc = 'insufficient funds'
       }
     } else if (tool = 'repair') {
       if (gamestate.resource > 3000) { 
         let n = neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,50)
         if (n!= null) {
           pos = [n.pos.x, n.pos.y]
-          tool = 'confirm'
           confimg = repair
+          tool = 'confirm'
           pCost=3000
         }
         confirmFn = function() { 
@@ -680,12 +757,11 @@ function mouseReleased() {
         }
       } else {
         gamestate.info = ''
-        gamestate.desc = 'TOO EXPENSIVE'
+        gamestate.desc = 'insufficient funds'
         tool = 'select'
         pCost = 0
       }
     }
-
   }
   dragging = false
 }

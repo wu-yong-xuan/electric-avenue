@@ -1,5 +1,5 @@
 class GameState {
-    constructor(n, c, r = 100000, cost = this.cost1, income = this.income1) {
+    constructor(n, c, s, r = 100000, cost = this.cost1, income = this.income2) {
         this.neighborhood = n
         this.season = 'fall'  
         this.colorScheme = c
@@ -10,6 +10,8 @@ class GameState {
         this.incomefn = income
         this.step = 0
         this.activeArea = 0
+        this.industrialArea = 0
+        this.residentialArea = 0
         this.offlineArea = 0
         this.load = 0
         this.cyclesPerStep = 60
@@ -24,6 +26,9 @@ class GameState {
         this.cost = 0
         this.info = ''
         this.desc = ''
+        this.pDownSounds = s
+        this.failRandom = ['Pole Down', 'Overload', 'Fallen Tree']
+        this.failHuman = ['Vandalism', 'Mylar Balloon']
     }
 
     startClock() {
@@ -74,16 +79,27 @@ class GameState {
             this.resource -= Math.round(250 * this.neighborhood.pl.length / this.cyclesPerStep) //load
             this.resource -= Math.round((this.numGens-1) * 2000 / this.cyclesPerStep / 2)
             this.resource -= Math.round((this.neighborhood.stations.length-1) * 2000 / this.cyclesPerStep / 2)
+            if (this.neighborhood.stations.length == 0) {
+                this.cost -= Math.round((this.neighborhood.stations.length-1) * 2000 / this.cyclesPerStep / 2) 
+                this.resource+= Math.round((this.neighborhood.stations.length-1) * 2000 / this.cyclesPerStep / 2)
+            }
         }
     }
     calcArea() {
         this.activeArea = 0
         this.offlineArea = 0
+        this.industrialArea = 0
+        this.residentialArea = 0
         this.neighborhood.blocks.forEach(b => {
             if (b.occupied && b.powered) {
                 this.activeArea += b.area
+                if (b.type == 'Industrial') {
+                    this.industrialArea += b.area 
+                } else {
+                    this.residentialArea += b.area
+                }
             } else if (!b.occupied) {
-                this.offlineArea -= b.area
+                this.offlineArea += b.area
             }
         })
         this.activeArea = Math.round(this.activeArea)
@@ -92,6 +108,11 @@ class GameState {
     income1() {
         this.resource += Math.round(this.activeArea/8/this.cyclesPerStep)
         this.income = Math.round(this.activeArea/8/this.cyclesPerStep) - this.cost
+    }
+    income2() {
+        let num = Math.round(5*this.industrialArea * this.residentialArea /(this.industrialArea + this.residentialArea+1) /8 / this.cyclesPerStep)
+        this.resource += num
+        this.income = num - this.cost
     }
 
     buyPL(length, pl) {
@@ -125,16 +146,18 @@ class GameState {
         if (r < this.load / 1000000 / this.cyclesPerStep) {
             print(this.load, r)
             print(this.load/1000000)
-            neighborhood.randomFailure()
+            idx = neighborhood.randomFailure(getRandom(this.pDownSounds))
+            this.desc = getRandom(this.failRandom)
         }
         if (r < this.offlineArea / 1000000 / this.cyclesPerStep) {
             print(this.load, r)
             print(this.load/1000000)
-            neighborhood.randomFailure()
+            idx = neighborhood.randomFailure(getRandom(this.pDownSounds))
+            this.desc = getRandom(this.failHuman)
         }
         if (idx != -1) {
-            this.info = "Block " + idx
-            this.desc = "Line Down"
+            this.info = "Line " + idx + ' Down:' 
+            //this.desc = "Line Down"
         }
     }
 
@@ -161,6 +184,9 @@ class GameState {
                 let c2 = this.colorScheme.get(this.next)
                 this.bg = lerpColor(color(c1.bg), color(c2.bg), (this.step% (60*this.cyclesPerStep) - 40*this.cyclesPerStep) / (20*this.cyclesPerStep) )
                 this.riverColor = lerpColor(color(c1.river), color(c2.river), (this.step% (60*this.cyclesPerStep) - 40*this.cyclesPerStep) / (20*this.cyclesPerStep ))
+            }
+            if (this.step % this.cyclesPerStep == 0) {
+                this.neighborhood.blocks.forEach(b=> b.decay())
             }
         }
     }

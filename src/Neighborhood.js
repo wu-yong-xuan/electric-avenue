@@ -52,12 +52,13 @@ class Neighborhood {
         }
     }
     
-    randomFailure() {
+    randomFailure(sound) {
         let p = this.pl.filter(p=>p instanceof Powerline)
         let i = Math.floor((Math.random()*p.length))
         p = p[i]
         p.critical = true
         p.powerOff()
+        sound.play()
         return i
     }
 
