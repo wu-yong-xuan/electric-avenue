@@ -36,6 +36,7 @@ let confx, confy
 let annoyingconf = false
 let loading = 2
 let progress
+let path = null
 
 function preload() {
   networkSettings = loadJSON("data/nws_decent.json")
@@ -50,8 +51,8 @@ function preload() {
   help = loadImage(IMGDIR + 'HELP.svg')
   hydro = loadImage(IMGDIR + 'HYDRO.svg')
   service = loadImage(IMGDIR + 'SERVICE TRUCK.svg')
-  confirmimg = loadImage(IMGDIR + 'HELP.svg')
-  cancelimg = loadImage(IMGDIR + 'HELP.svg')
+  confirmimg = loadImage(IMGDIR + 'CONFIRM.svg')
+  cancelimg = loadImage(IMGDIR + 'CANCEL.svg')
   powerDownSounds = []
   for (let i = 1; i <=3; i++) {
     powerDownSounds.push(loadSound(SNDDIR + '0'+i+'.mp3'))
@@ -198,9 +199,25 @@ function draw() {
   if (dragging) { 
     if  (tool == 'select'){
       //draw()
-      strokeWeight(3)
-      stroke('black')
-      line(selectedPL.x,selectedPL.y, (mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef);
+
+    //  strokeWeight(3)
+    //  stroke('black')
+    //  line(selectedPL.x,selectedPL.y, (mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef);
+      if (selectedPL instanceof PowerGenerator) {
+        strokeWeight(3)
+        stroke('black')
+        line(selectedPL.x,selectedPL.y, (mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef);
+      }
+      else if (frameCount%5 == 0) {
+        let nog = neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
+        if (nog != null) {
+          path = neighborhood.shortestPath(selectedPL.node, nog)
+        }
+      }
+      if (path!= null) {
+        neighborhood.displayPath(path, 'white')
+      }
+
     } else if (tool == 'repair') {
       image(repair, ((mouseX - offset.x) / scalef)-10.5, ((mouseY - offset.y) / scalef)-10.5, 21, 21, 0, 0, repair.width, repair.height, 'CONTAIN')
     } else if (tool == 'build') {
@@ -337,28 +354,52 @@ function drawUI() {
   image(board, 46, 83)
   image(logo,61,23)//, 61 + logo.width/3, 43 + logo.height/3, 0, 0, logo.width, logo.height, 'CONTAIN')
   
+  let xstart = 176
+  let ystart = 150
+  let yoff = 20
+  let xoff = 8
+
   fill(0);
   textFont(boldfont)
   textAlign(RIGHT, CENTER)
-  text('Date:', 176,170)
-  text('Income: ', 176, 190 )
-  text('Cost: ', 176, 210)
-  text('Money: ', 176, 230)
-  text(gamestate.info, 176, 250)
+  text('Date: ', xstart,ystart)
+  text('Revenue: ', xstart,ystart+yoff)
+  text('Income: ', xstart, ystart+yoff*2)
+  text('Expense: ', xstart, ystart+3*yoff)
+  text('Money: ', xstart, ystart+4*yoff)
+  text('Cost: ', xstart, ystart+5*yoff)
+  text(gamestate.info, xstart , ystart+6*yoff)
+
   fill(255)
   textAlign(LEFT,CENTER)
-  text(gamestate.date, 184,170)
-  if (gamestate.income < 0) {
+  text(gamestate.date, xstart+xoff,ystart+0*yoff)
+  if (gamestate.income < gamestate.cost) {
     fill(colors.get('block').off)
-    text(gamestate.income, 184, 190 )
+    text('-$'+ -1*(gamestate.income-gamestate.cost), xstart+xoff, ystart+1*yoff )
     fill(255)
   } else {
-    text('$'+gamestate.income, 184, 190 )
+    text('$'+(gamestate.income-gamestate.cost), xstart+xoff, ystart+1*yoff )
   }
+  text('$'+gamestate.income, xstart+xoff, ystart+2*yoff )
+  text('-$'+gamestate.cost, xstart+xoff, ystart+3*yoff)
   
-  text('-$'+gamestate.cost, 184, 210)
-  text('$'+gamestate.resource, 184, 230)
-  text(gamestate.desc, 184, 250)
+  if (gamestate.resource < 0) {
+    fill(colors.get('block').off)
+    text('$'+gamestate.resource, xstart+xoff, ystart+4*yoff)
+    fill(255)
+  } else {
+    text('$'+gamestate.resource, xstart+xoff, ystart+4*yoff)
+  }
+
+  if (gamestate.resource < pCost) {
+    fill(colors.get('block').off)
+    text('$'+pCost, xstart+xoff, ystart+5*yoff)
+    fill(255)
+  } else {
+    text('$'+pCost, xstart+xoff, ystart+5*yoff)
+  }
+
+  text(gamestate.desc, xstart+xoff, ystart+6*yoff)
   textFont(font)
 
   image(bolt, 29, windowHeight-114, 84, 84, 0, 0, bolt.width, bolt.height, 'CONTAIN')
@@ -382,12 +423,12 @@ function drawUI() {
     if (confimg != null) {
       annoyingconf = true
       image(confimg, confx-10.5*scalef, confy-10.5*scalef, 21*scalef, 21*scalef, 0, 0, confimg.width, confimg.height, 'CONTAIN')
-      image(confirmimg,  confx - 12.5 - 10.5, confy-10.5 + 4 + 21*scalef, 21, 21, 0, 0, confirmimg.width, confirmimg.height, 'CONTAIN')
-      image(cancelimg,  confx  + 12.5 - 10.5, confy-10.5 + 4 + 21*scalef, 21, 21, 0, 0, cancelimg.width, cancelimg.height, 'CONTAIN')
+      image(cancelimg,  confx - 12.5 - 10.5, confy-10.5 + 4 + 21*scalef, 21, 21, 0, 0, confirmimg.width, confirmimg.height, 'CONTAIN')
+      image(confirmimg,  confx  + 12.5 - 10.5, confy-10.5 + 4 + 21*scalef, 21, 21, 0, 0, cancelimg.width, cancelimg.height, 'CONTAIN')
     } else {
       annoyingconf = false
-      image(confirmimg,  confx-10.5 - 12.5 , confy-10.5 + 25 , 21, 21, 0, 0, confirmimg.width, confirmimg.height, 'CONTAIN')
-      image(cancelimg,  confx -10.5 + 12.5 , confy-10.5 + 25 , 21, 21, 0, 0, cancelimg.width, cancelimg.height, 'CONTAIN')
+      image(cancelimg,  confx-10.5 - 12.5 , confy-10.5 + 25 , 21, 21, 0, 0, confirmimg.width, confirmimg.height, 'CONTAIN')
+      image(confirmimg,  confx -10.5 + 12.5 , confy-10.5 + 25 , 21, 21, 0, 0, cancelimg.width, cancelimg.height, 'CONTAIN')
     }
    // text('press ENTER to confirm or ESC to cancel', 61,320)
    // text(`Remaining Resouces: ${gamestate.resource-pCost}`, 61,340)
@@ -580,18 +621,18 @@ function mouseClicked() {
   if (tool == 'confirm') {
     if (annoyingconf == false) {
       if (dist(mouseX, mouseY, confx-12.5, confy+25) < 10.5) {
-        confirmFn()
+        cancelFn()
         confimg=null
       } else if (dist(mouseX, mouseY, confx+ 12.5, confy+25) < 10.5) {
-        cancelFn()
+        confirmFn()
         confimg=null
       }
     } else if (annoyingconf == true) {
       if (dist(mouseX, mouseY, confx - 12.5 , confy + 4 + 21*scalef) < 10.5) {
-        confirmFn()
+        cancelFn()
         confimg=null
       } else if (dist(mouseX, mouseY,confx + 12.5 , confy +4 + 21*scalef) < 10.5) {
-        cancelFn()
+        confirmFn()
         confimg=null
       }
     }
@@ -605,13 +646,13 @@ function mouseClicked() {
   } else if (dist(mouseX, mouseY, 112*3+29+42, windowHeight-114+42) < 42) {
     window.open("help.html");
   }
-  let block = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
+  //let block = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
   // if (block != null && tool == 'select') {
   //   selectedBlock = block
   //   selectedBlockID = neighborhood.getBlockID(block)
   //   drawUI()
   // }
-  let pl = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
+  //let pl = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
   // if (pl != null && tool == 'repair') {
   //   neighborhood.stations[0].dispatchCrew(pl, neighborhood)
   // }
@@ -678,8 +719,8 @@ function mouseReleased() {
           pCost = gamestate.powerlineCost(ple.len)
           if (pCost > gamestate.resource) {
             //pCost = String(pCost) + '\nTOO EXPENSIVE'
-            gamestate.info = 'insufficient funds'
-            gamestate.desc = '$'+pCost
+            //gamestate.info = 'insufficient funds'
+            //gamestate.desc = '$'+pCost
             if (_add) { 
               neighborhood.rmPLine(pop)
             }
@@ -733,7 +774,7 @@ function mouseReleased() {
         gamestate.info = ''
         tool = 'select'
         pCost = 0
-        gamestate.desc = 'insufficient funds'
+        //gamestate.desc = 'insufficient funds'
       }
     } else if (tool = 'repair') {
       if (gamestate.resource > 3000) { 
@@ -757,7 +798,7 @@ function mouseReleased() {
         }
       } else {
         gamestate.info = ''
-        gamestate.desc = 'insufficient funds'
+        //gamestate.desc = 'insufficient funds'
         tool = 'select'
         pCost = 0
       }

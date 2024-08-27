@@ -112,7 +112,7 @@ class GameState {
     income2() {
         let num = Math.round(5*this.industrialArea * this.residentialArea /(this.industrialArea + this.residentialArea+1) /8 / this.cyclesPerStep)
         this.resource += num
-        this.income = num - this.cost
+        this.income = num //- this.cost
     }
 
     buyPL(length, pl) {

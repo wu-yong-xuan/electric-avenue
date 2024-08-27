@@ -26,8 +26,9 @@ class ServiceTeam {
                 await sleep(30)
             }
         } 
-        await sleep(1000)
         if (sound != null) {sound.play()}
+        await sleep(1000)
+        
         dest.critical = false
         gs.info = 'Line up:'
         gs.desc = getRandom(this.compliments)
@@ -66,7 +67,7 @@ class ServiceTeam {
         this.breakTime = 3
         if (this.station.queue.length > 0) {
             let args = this.station.queue.shift()
-            this.dispatch(args[0], args[1], args[2], gs, dest.node)
+            this.dispatch(args[0], args[1], args[2], gs)
             return
         }
         this.station.teamsReady++

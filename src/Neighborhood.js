@@ -53,7 +53,7 @@ class Neighborhood {
     }
     
     randomFailure(sound) {
-        let p = this.pl.filter(p=>p instanceof Powerline)
+        let p = this.pl.filter(p=> !(p instanceof PowerGenerator))
         let i = Math.floor((Math.random()*p.length))
         p = p[i]
         p.critical = true

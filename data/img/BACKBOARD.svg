@@ -1,1 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?><svg id="MENU_ITEMS" xmlns="http://www.w3.org/2000/svg" width="305.5" height="235.5" viewBox="0 0 305.5 235.5"><defs><style>.cls-1{fill:#59d8f7;stroke:#000;stroke-miterlimit:10;stroke-width:4px;}</style></defs><g id="TEXT"><path class="cls-1" d="M14.627,36.433L281.5,12.5c12.607,69.003,5.466,138.663-22,209L16.5,175.5l-1.873-139.067Z"/></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="MENU_ITEMS" data-name="MENU ITEMS" xmlns="http://www.w3.org/2000/svg" width="305.5" height="265.5" viewBox="0 0 305.5 265.5">
+  <g id="TEXT">
+    <g id="_ORIGINAL_" data-name="[ORIGINAL]">
+      <g id="TEXT-2" data-name="TEXT">
+        <path d="M30.6878,33.5l246.1957-19.845c12.1976,77.8661,11.3785,156.4735-15.1957,235.845l-229.1878-49-1.8122-167Z" fill="#7cc4d4" stroke="#000" stroke-miterlimit="10" stroke-width="4"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -49,8 +49,12 @@ class Substation {
     }
     display() {
         noStroke()
-        fill('lavendar')
-        circle(this.x, this.y, 10)
+        if (this.powered){
+            fill('Plum')
+        }else {
+            fill('MediumPurple')   
+        }
+            circle(this.x, this.y, 10)
     }
 
 
