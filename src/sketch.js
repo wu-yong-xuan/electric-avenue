@@ -989,7 +989,7 @@ function mouseReleased() {
           confirmation = true
         }
         confirmFn = function() { 
-          stationSound.play()
+          repairStaSound.play()
           let station = new ServiceStation(n, repair, service)
           gamestate.addStation(station)
           station.addCrew(new ServiceTeam())      
