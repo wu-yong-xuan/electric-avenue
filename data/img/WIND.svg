@@ -1,1 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?><svg id="SMALL" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><defs><style>.cls-1{fill:#51c367;stroke-width:4px;}.cls-1,.cls-2{stroke:#021437;stroke-miterlimit:10;}.cls-2{fill:none;stroke-linecap:round;stroke-width:3.941px;}</style></defs><circle class="cls-1" cx="24" cy="24" r="21.124"/><g id="GRAPHICS-2"><g id="WIND"><path class="cls-2" d="M30.161,22.799c.394,0,2.478-.039,4.164-1.72.213-.213,1.82-1.862,1.731-4.175-.097-2.539-2.2-4.907-5.224-5.644"/><line class="cls-2" x1="9.398" y1="22.799" x2="30.161" y2="22.799"/><path class="cls-2" d="M27.178,34.758c.25-.002.913.025,1.507.487.641.498,1.059,1.373.878,2.236-.218,1.036-1.251,1.828-2.472,1.79"/><line class="cls-2" x1="16.778" y1="34.758" x2="26.854" y2="34.758"/><line class="cls-2" x1="11.399" y1="28.778" x2="37.299" y2="28.778"/><line class="cls-2" x1="13.131" y1="16.443" x2="26.97" y2="16.443"/></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_24PX" data-name="24PX" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="10.491" fill="#51c367" stroke="#021437" stroke-miterlimit="10"/>
+  <g id="WIND">
+    <path d="M15.105,11.723c.198,0,1.247-.019,2.096-.865.107-.107.916-.937.871-2.101-.049-1.278-1.107-2.47-2.629-2.841" fill="none" stroke="#021437" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.983"/>
+    <line x1="4.655" y1="11.723" x2="15.105" y2="11.723" fill="none" stroke="#021437" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.983"/>
+    <path d="M13.604,17.742c.126-.001.459.013.758.245.322.251.533.691.442,1.125-.11.521-.63.92-1.244.901" fill="none" stroke="#021437" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.983"/>
+    <line x1="8.37" y1="17.742" x2="13.441" y2="17.742" fill="none" stroke="#021437" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.983"/>
+    <line x1="5.662" y1="14.733" x2="18.698" y2="14.733" fill="none" stroke="#021437" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.983"/>
+    <line x1="6.534" y1="8.524" x2="13.5" y2="8.524" fill="none" stroke="#021437" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.983"/>
+  </g>
+</svg>

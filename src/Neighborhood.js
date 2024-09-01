@@ -237,6 +237,7 @@ class Neighborhood {
             if (tmp != null) {
                 b.occupied = tmp.occupied 
                 b.type = tmp.type
+                b.connectedPL = tmp.connectedPL
             }
         })
         this.blocks = newNeighborhood.blocks
@@ -255,6 +256,11 @@ class Neighborhood {
         })
         this.stations.forEach(s=>s.update(this.relocate(s.node, newNeighborhood)))
         this.distributePower()
+        this.pl.array.forEach(element => {
+            if (element instanceof PowerGenerator) {
+                element.powerOn()
+            }
+        });
     }
 
     display(on='rgba(255,0,0,0.4)', off='rgba(0,0,255,0.4)', unoc = 'rgba(255,255,255, 0.2)') {

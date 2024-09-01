@@ -68,6 +68,10 @@ function preload() {
     powerDownSounds.push(loadSound(SNDDIR + '0'+i+'.mp3'))
   }
   repairSound = loadSound(SNDDIR + 'REPAIR.mp3')
+
+  repairStaSound = loadSound(SNDDIR + 'repair_station.mp3')
+  stationSound = loadSound(SNDDIR + 'station.mp3')
+  transformerSound = loadSound(SNDDIR + 'transformer.mp3')
 }
 
 function setup() {
@@ -536,9 +540,11 @@ function keyReleased() {
   if (confirmation == true) {
       if (keyCode === ESCAPE) {
         cancelFn()
+        tool = 'select'
         confimg=null
       } else if (keyCode === ENTER) {
         confirmFn()
+        tool = 'select'
         confimg=null
       }
 
@@ -822,6 +828,7 @@ function mouseReleased() {
             pos = [pop.x,pop.y]
             confirmation = true
             confirmFn = function() { 
+              transformerSound.play()
               neighborhood.distributePowerAnim()
               gamestate.buyPL(ple.len, pop)
               if (pop.powered) {pop.powerOn()}
@@ -854,6 +861,7 @@ function mouseReleased() {
             pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
             confimg = hydro
             confirmFn = function() {
+              stationSound.play()
               gamestate.addGen(pos[0],pos[1],hydro,'hydro')
               gamestate.startClock()
               confirmation = false
@@ -881,6 +889,7 @@ function mouseReleased() {
           pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
           confimg = solar
           confirmFn = function() {
+            stationSound.play()
             gamestate.addGen(pos[0],pos[1],solar,'solar')
             gamestate.startClock()
             confirmation = false
@@ -904,6 +913,7 @@ function mouseReleased() {
           pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
           confimg = wind
           confirmFn = function() {
+            stationSound.play()
             gamestate.addGen(pos[0],pos[1],wind,'wind')
             gamestate.startClock()
             confirmation = false
@@ -927,6 +937,7 @@ function mouseReleased() {
           pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
           confimg = fossil
           confirmFn = function() {
+            stationSound.play()
             gamestate.addGen(pos[0],pos[1],fossil,'fossil')
             gamestate.startClock()
             confirmation = false
@@ -950,6 +961,7 @@ function mouseReleased() {
           pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
           confimg = nuclear
           confirmFn = function() {
+            stationSound.play()
             gamestate.addGen(pos[0],pos[1],nuclear,'nuclear')
             gamestate.startClock()
             confirmation = false
@@ -977,6 +989,7 @@ function mouseReleased() {
           confirmation = true
         }
         confirmFn = function() { 
+          stationSound.play()
           let station = new ServiceStation(n, repair, service)
           gamestate.addStation(station)
           station.addCrew(new ServiceTeam())      
