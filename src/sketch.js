@@ -165,7 +165,7 @@ function draw() {
   } 
   if (frameCount % 1 == 0) {
     gamestate.timestep(async function(){
-      for (let _ = 0; _<5; _++) {
+      for (let _ = 0; _<4; _++) {
         network.iterate(); 
         await sleep(100)
       } 
@@ -256,7 +256,7 @@ async function loadCity() {
     network.iterate();
     network.iterate();
     network.iterate();
-    network.iterate();
+    //network.iterate();
     progress = "LOADING "+ (i+1) + '/12'
     await sleep(100)
     cityData.push(generateShapes())
