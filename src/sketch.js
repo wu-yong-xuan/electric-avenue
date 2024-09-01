@@ -499,7 +499,8 @@ function gameover() {
   clear()
   gameOver = true
   gamestate.active = false
-  background('white')
+  document.location.href = '../lose.html';
+/*  background('white')
   // scale(1/scalef)
   // translate(-offset.x, -offset.y);
   stroke(0)
@@ -509,7 +510,7 @@ function gameover() {
   textAlign(LEFT, CENTER);
   text('GAME OVER - you went bankrupt', 600,96)
   text('reload the page to try again', 600,144)
-  noLoop()
+  */noLoop()
 }
 
 function keyPressed() {
@@ -675,17 +676,21 @@ function mouseClicked() {
     if (annoyingconf == false) {
       if (dist(mouseX, mouseY, confx-12.5, confy+25) < 10.5) {
         cancelFn()
+        tool = 'select'
         confimg=null
       } else if (dist(mouseX, mouseY, confx+ 12.5, confy+25) < 10.5) {
         confirmFn()
+        tool = 'select'
         confimg=null
       }
     } else if (annoyingconf == true) {
       if (dist(mouseX, mouseY, confx - 12.5 , confy + 4 + 21*scalef) < 10.5) {
         cancelFn()
+        tool = 'select'
         confimg=null
       } else if (dist(mouseX, mouseY,confx + 12.5 , confy +4 + 21*scalef) < 10.5) {
         confirmFn()
+        tool = 'select'
         confimg=null
       }
     }
@@ -837,7 +842,7 @@ function mouseReleased() {
       } 
     } else if (tool == 'select' && (selectedPL instanceof ServiceStation)) {
         let plee = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,20)
-        if (plee != null) {
+        if (plee != null && !(plee instanceof ServiceStation)) {
           selectedPL.dispatchCrew(plee, neighborhood, repairSound, gamestate)
         }
     } else if (tool == 'build') {
@@ -963,13 +968,13 @@ function mouseReleased() {
         }
       } 
     } else if (tool == 'repair') {
+      pCost=3000
       if (gamestate.resource > 3000) { 
         let n = neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,50)
         if (n!= null) {
           pos = [n.pos.x, n.pos.y]
           confimg = repair
           confirmation = true
-          pCost=3000
         }
         confirmFn = function() { 
           let station = new ServiceStation(n, repair, service)
@@ -986,7 +991,7 @@ function mouseReleased() {
         gamestate.info = ''
         //gamestate.desc = 'insufficient funds'
         //tool = 'select'
-        pCost = 0
+        //pCost = 0
       }
     }
   }

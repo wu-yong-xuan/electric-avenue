@@ -201,7 +201,7 @@ class GameState {
         }
     }
     win() {
-
+        document.location.href = '../win.html';
     }
 
 

@@ -6,10 +6,10 @@ if (cityName) {
 }
 
 document.getElementById('startButton').addEventListener('click', function() {
-    window.location.href = 'electric-avenue.html';
+    window.location.href = 'index.html';
 });
 
 
 
-    
+
 
