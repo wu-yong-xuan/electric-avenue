@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="_24PX" data-name="24PX" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-  <circle cx="12" cy="12" r="10.491" fill="#51c367" stroke="#021437" stroke-miterlimit="10"/>
-  <g id="NUCLEAR">
-    <path d="M12.973,10.185c.174.091.456.269.698.587.376.494.422,1.018.428,1.221v.058h7.867c.027-.837-.005-3.214-1.583-5.595-1.482-2.237-3.482-3.2-4.268-3.53l-3.12,7.153" fill="#021437" stroke="#021437" stroke-linecap="square" stroke-miterlimit="10" stroke-width=".407"/>
-    <path d="M9.883,12.03c.01-.227.068-.85.54-1.38.197-.22.408-.361.573-.45l-3.028-7.273c-.805.34-2.777,1.299-4.268,3.495-1.615,2.38-1.686,4.772-1.672,5.63h7.854" fill="#021437" stroke="#021437" stroke-linecap="square" stroke-miterlimit="10" stroke-width=".407"/>
-    <path d="M7.671,20.955l3.326-7.047c.172.09.537.25,1.023.245.46-.005.805-.156.976-.245l.011.024,3.348,7.092c-.747.385-2.277,1.047-4.314,1.051-2.082.004-3.642-.68-4.39-1.069l.02-.051Z" fill="#021437" stroke="#021437" stroke-linecap="square" stroke-miterlimit="10" stroke-width=".407"/>
-    <circle cx="11.995" cy="12.038" r=".964" fill="#021437" stroke="#021437" stroke-linecap="round" stroke-miterlimit="10" stroke-width=".527"/>
+<svg id="SMALL" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <circle cx="24" cy="24" r="21.124" fill="#59d671" stroke="#021437" stroke-miterlimit="10" stroke-width="2"/>
+  <g id="GRAPHICS-2" data-name="GRAPHICS">
+    <g id="NUCLEAR">
+      <path d="M25.995,20.201c.358.188.938.554,1.438,1.21.775,1.018.868,2.096.882,2.515l.002.12h16.199c.056-1.724-.01-6.618-3.26-11.522-3.053-4.606-7.17-6.589-8.788-7.269l-6.425,14.73" fill="#021437" stroke="#021437" stroke-linecap="square" stroke-miterlimit="10" stroke-width=".839"/>
+      <path d="M19.632,24c.02-.468.14-1.75,1.113-2.841.405-.454.84-.744,1.18-.926l-6.235-14.978c-1.659.7-5.72,2.674-8.789,7.198-3.326,4.902-3.473,9.827-3.442,11.593h16.174" fill="#021437" stroke="#021437" stroke-linecap="square" stroke-miterlimit="10" stroke-width=".839"/>
+      <path d="M15.075,42.378l6.85-14.512c.355.185,1.105.515,2.107.505.947-.01,1.658-.321,2.01-.504l.023.049,6.894,14.605c-1.539.793-4.688,2.155-8.885,2.164-4.288.009-7.499-1.401-9.04-2.202l.041-.104Z" fill="#021437" stroke="#021437" stroke-linecap="square" stroke-miterlimit="10" stroke-width=".839"/>
+      <circle cx="23.981" cy="24.05" r="1.915" fill="#021437" stroke="#021437" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.047"/>
+    </g>
   </g>
 </svg>

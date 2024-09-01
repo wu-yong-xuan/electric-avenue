@@ -40,7 +40,7 @@ class PowerGenerator {
     }
     display() { 
         if (!this.active) {this.powered = false}
-        image(this.img, this.x-10.5,this.y-10.5, 21,21,0,0,84,84,'CONTAIN')
+        image(this.img, this.x-10.5,this.y-10.5, 21,21,0,0,this.img.width,this.img.height,'CONTAIN')
         //noStroke()
         //fill('purple')
         //circle(this.x, this.y, 20)

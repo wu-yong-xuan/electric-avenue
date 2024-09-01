@@ -727,7 +727,7 @@ function mouseClicked() {
     }
   }
   if (tool == 'help' && dist(mouseX, mouseY, 91*3+29+31.5, windowHeight-140+10.5) < 10.5) {
-    window.open("help.html");
+    window.open("https://docs.google.com/document/d/1f3yd-Af01pex1mGWwMqOJTgXaB0rzDGvLS7OhefFbFM/edit");
   }
   //let block = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
   // if (block != null && tool == 'select') {
