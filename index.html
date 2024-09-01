@@ -1,22 +1,35 @@
 <!DOCTYPE html>
-<html lang="">
-
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Electric Avenue</title>
-  <link rel="icon" type="image/x-icon" href="../data/img/favicon.ico">
-  <style>
-    body {
-      padding: 0;
-      margin: 0;
-      overflow: hidden;
-    }
-  </style>
- 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Grid Network</title>
+    <link rel="icon" type="image/x-icon" href="../data/img/favicon.ico">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
-
 <body>
-</body>
+    <div class="container">
+        <div class="left-column">
+            <img src="data/img/logo.svg" alt="Logo" class="logo">
+        </div>
+        <div class="right-column">
+            <div class="city-name-input">
+                <label for="cityName">Name your city:</label>
+                <input type="text" id="cityName" placeholder="Enter city name">
+                <button id="enterButton">Enter</button>
+            </div>
+            <div id="gameText" class="hidden">
+                <p id="cityText">
+                    The mayor of <span id="cityNameDisplay"></span> put you in charge of building <span id="cityNameDisplay2"></span>'s electrical grid network. 
+                    It's an honor, and you are ready for it. Add power plants, substations and transformers to connect all neighborhoods to power. Send service crews to fix power outages, and keep track of your budget. As the seasons change and the city grows, adjust your grid to meet changing demands. Can you take it higher? Which network will give your customers the most uptime at the lowest possible cost? 
+                    </p><p id="cityText">
+                    If you figure it all out and reach $10,000,000, you can retire early. If you fail, you will be fired. Good luck and <i>get down to Electric Avenue</i>.
+                </p>
+                <button class="start-button" id="startButton">START</button>
+            </div>
+        </div>
+    </div>
 
+    <script src="src/script.js"></script>
+</body>
 </html>

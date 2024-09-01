@@ -236,6 +236,7 @@ class Neighborhood {
             let tmp = this.getBlockFromCoords(b.center[0],b.center[1], 30)
             if (tmp != null) {
                 b.occupied = tmp.occupied 
+                b.type = tmp.type
             }
         })
         this.blocks = newNeighborhood.blocks

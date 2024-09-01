@@ -13,7 +13,7 @@ class Block {
         this.connectedPL = []
         this.area = geometric.polygonArea(this.verts)
         this.timeUnpowered = -1
-        if (Math.random() < 0.3) {
+        if (Math.random() < 0.35) {
             this.type = 'Industrial'
         } else {
             this.type = 'Residential'
@@ -89,25 +89,25 @@ class Block {
         return closest
     }
 
-    display(on, off, unoc) {
+    display(res, ind, unoc) {
         //this.poly.display('#2d5425', false)
         if (this.type == 'Industrial') {
             if (this.occupied) {
                 if (!this.powered) {
-                    this.displayhelper(off, true)
+                    this.displayhelper(ind, true)
                 } else {
-                    this.displayhelper(on, true)
+                    this.displayhelper(ind, false)
                 }
             } else {
-                this.displayhelper(unoc, true)
+                this.displayhelper(unoc, false)
             }
             return
         }
         if (this.occupied) {
             if (!this.powered) {
-                this.displayhelper(off, false)
+                this.displayhelper(res, true)
             } else {
-                this.displayhelper(on, false)
+                this.displayhelper(res, false)
             }
         } else {
             this.displayhelper(unoc, false)
@@ -120,11 +120,11 @@ class Block {
         if (ispattern) {
             patternAngle(PI/4)
             let colo = color(col)
-            pattern(PTN.stripe(8))
+            pattern(PTN.stripe(2))
             noStroke()
             beginShapePattern()
             // stroke('red')
-            patternColors([colo, lerpColor(colo,color('white'),0.2)])
+            patternColors([colo, lerpColor(colo,color('black'),0.5)])
             this.verts.forEach(v => {
                 vertexPattern(v[0], v[1])
             })

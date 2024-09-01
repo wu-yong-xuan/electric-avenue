@@ -1,7 +1,10 @@
 class PowerGenerator {
-    constructor(x, y, img) {
+    constructor(x, y, img, type) {
         this.x = x
         this.y = y
+        this.active = true
+        this.type = type
+        this.critical = false //unused??
         this.powered = true
         this.capacity 
         this.output
@@ -36,6 +39,7 @@ class PowerGenerator {
         }
     }
     display() { 
+        if (!this.active) {this.powered = false}
         image(this.img, this.x-10.5,this.y-10.5, 21,21,0,0,84,84,'CONTAIN')
         //noStroke()
         //fill('purple')

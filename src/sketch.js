@@ -37,6 +37,8 @@ let annoyingconf = false
 let loading = 2
 let progress
 let path = null
+let confirmation = false
+let gentype = null 
 
 function preload() {
   networkSettings = loadJSON("data/nws_decent.json")
@@ -49,7 +51,15 @@ function preload() {
   repair = loadImage(IMGDIR + 'REPAIR.svg')
   pan = loadImage(IMGDIR + 'PAN.svg')
   help = loadImage(IMGDIR + 'HELP.svg')
+  boltsel = loadImage(IMGDIR + 'GENERATOR.svg')
+  repairsel = loadImage(IMGDIR + 'REPAIR (1).svg')
+  pansel = loadImage(IMGDIR + 'PAN (1).svg')
+  helpsel = loadImage(IMGDIR + 'HELP (1).svg')
   hydro = loadImage(IMGDIR + 'HYDRO.svg')
+  solar = loadImage(IMGDIR + 'SOLAR.svg')
+  wind = loadImage(IMGDIR + 'WIND.svg')
+  fossil = loadImage(IMGDIR + 'FOSSIL.svg')
+  nuclear = loadImage(IMGDIR + 'NUCLEAR.svg')
   service = loadImage(IMGDIR + 'SERVICE TRUCK.svg')
   confirmimg = loadImage(IMGDIR + 'CONFIRM.svg')
   cancelimg = loadImage(IMGDIR + 'CANCEL.svg')
@@ -80,8 +90,9 @@ function setup() {
       river: getComputedStyle(document.documentElement).getPropertyValue('--river-summer-color')
     })
   colors.set('block', {
-      on: getComputedStyle(document.documentElement).getPropertyValue('--block-powered'), 
+      res: getComputedStyle(document.documentElement).getPropertyValue('--block-powered'), 
       off: getComputedStyle(document.documentElement).getPropertyValue('--block-unpowered'),
+      ind: getComputedStyle(document.documentElement).getPropertyValue('--block-industrial'),
       unoccupied: getComputedStyle(document.documentElement).getPropertyValue('--block-unoccupied')
   })
   colors.set('road', {
@@ -173,7 +184,7 @@ function draw() {
   translate(offset.x, offset.y);
   scale(scalef)
   river.display(gamestate.riverColor)
-  neighborhood.display(gamestate.colorScheme.get('block').on, gamestate.colorScheme.get('block').off, gamestate.colorScheme.get('block').unoccupied)
+  neighborhood.display(gamestate.colorScheme.get('block').res, gamestate.colorScheme.get('block').ind, gamestate.colorScheme.get('block').unoccupied)
   network.display({ showNodes: false }, gamestate.colorScheme.get('road').color)
   
 
@@ -221,7 +232,7 @@ function draw() {
     } else if (tool == 'repair') {
       image(repair, ((mouseX - offset.x) / scalef)-10.5, ((mouseY - offset.y) / scalef)-10.5, 21, 21, 0, 0, repair.width, repair.height, 'CONTAIN')
     } else if (tool == 'build') {
-      image(hydro, ((mouseX - offset.x) / scalef)-10.5, ((mouseY - offset.y) / scalef)-10.5, 21, 21, 0, 0, repair.width, repair.height, 'CONTAIN')
+      image(gentype, ((mouseX - offset.x) / scalef)-10.5, ((mouseY - offset.y) / scalef)-10.5, 21, 21, 0, 0, repair.width, repair.height, 'CONTAIN')
     }
   }
   drawUI()
@@ -352,10 +363,11 @@ function drawUI() {
   textAlign(LEFT, CENTER);
   
   image(board, 46, 83)
-  image(logo,61,23)//, 61 + logo.width/3, 43 + logo.height/3, 0, 0, logo.width, logo.height, 'CONTAIN')
+  //7264  3165
+  image(logo,95,50,206, 116,0,0)//, 61 + logo.width/3, 43 + logo.height/3, 0, 0, logo.width, logo.height, 'CONTAIN')
   
   let xstart = 176
-  let ystart = 150
+  let ystart = 160
   let yoff = 20
   let xoff = 8
 
@@ -363,8 +375,8 @@ function drawUI() {
   textFont(boldfont)
   textAlign(RIGHT, CENTER)
   text('Date: ', xstart,ystart)
-  text('Revenue: ', xstart,ystart+yoff)
-  text('Income: ', xstart, ystart+yoff*2)
+  text('Income: ', xstart,ystart+yoff)
+  text('Revenue: ', xstart, ystart+yoff*2)
   text('Expense: ', xstart, ystart+3*yoff)
   text('Money: ', xstart, ystart+4*yoff)
   text('Cost: ', xstart, ystart+5*yoff)
@@ -402,10 +414,42 @@ function drawUI() {
   text(gamestate.desc, xstart+xoff, ystart+6*yoff)
   textFont(font)
 
-  image(bolt, 29, windowHeight-114, 84, 84, 0, 0, bolt.width, bolt.height, 'CONTAIN')
-  image(repair, 112+29, windowHeight-114, 84, 84, 0, 0, repair.width, repair.height, 'CONTAIN')
-  image(pan, 112*2 + 29, windowHeight-114, 84, 84, 0, 0, pan.width, pan.height, 'CONTAIN')
-  image(help, 112*3 + 29, windowHeight-114, 84, 84, 0, 0, help.width, help.height, 'CONTAIN')
+  if (tool == 'repair') {
+    image(repairsel, 91+29, windowHeight-114, 63, 63, 0, 0, repair.width, repair.height, 'CONTAIN')
+    image(repair, 91+29+63/2-10.5, windowHeight-140, 21, 21, 0, 0, repair.width, repair.height, 'CONTAIN')
+  } else {
+    image(repair, 91+29, windowHeight-114, 63, 63, 0, 0, repair.width, repair.height, 'CONTAIN')
+  }  
+  if (tool == 'build') {
+    image(boltsel, 29, windowHeight-114, 63, 63, 0, 0, bolt.width, bolt.height, 'CONTAIN')
+    
+    image(hydro, 29+63/2-10.5-12.5, windowHeight-140-25, 21, 21, 0, 0, hydro.width, hydro.height, 'CONTAIN')
+    image(solar, 29+63/2-10.5+12.5, windowHeight-140-25, 21, 21, 0, 0, hydro.width, hydro.height, 'CONTAIN')
+    image(wind, 29+63/2-10.5-25, windowHeight-140, 21, 21, 0, 0, hydro.width, hydro.height, 'CONTAIN')
+    image(fossil, 29+63/2-10.5, windowHeight-140, 21, 21, 0, 0, hydro.width, hydro.height, 'CONTAIN')
+    image(nuclear, 29+63/2-10.5+25, windowHeight-140, 21, 21, 0, 0, hydro.width, hydro.height, 'CONTAIN')
+
+  } else {
+    image(bolt, 29, windowHeight-114, 63, 63, 0, 0, bolt.width, bolt.height, 'CONTAIN')
+  }
+  if (tool == 'pan') {
+    image(pansel, 91*2 + 29, windowHeight-114, 63, 63, 0, 0, pan.width, pan.height, 'CONTAIN')
+  }else {
+    image(pan, 91*2 + 29, windowHeight-114, 63, 63, 0, 0, pan.width, pan.height, 'CONTAIN')
+  }
+  if (tool == 'help')  {
+    image(helpsel, 91*3 + 29, windowHeight-114, 63, 63, 0, 0, help.width, help.height, 'CONTAIN')
+    image(help, 91*3 + 29 +63/2-10.5, windowHeight-140, 21, 21, 0, 0, repair.width, repair.height, 'CONTAIN')
+  } else {
+    image(help, 91*3 + 29, windowHeight-114, 63, 63, 0, 0, help.width, help.height, 'CONTAIN')
+  }
+    
+    
+  
+  
+  
+  
+ 
 
 /*
   if (selectedBlockID != undefined) {
@@ -417,7 +461,7 @@ function drawUI() {
   text(`Resources: ${gamestate.resource}`,800,24)
   text(`Projected Cost: ${pCost}`,1000,24)
   */
-  if (tool == 'confirm' ) {
+  if (confirmation == true ) {
     confx = pos[0]*scalef +  offset.x
     confy =  pos[1] * scalef + offset.y
     if (confimg != null) {
@@ -488,7 +532,16 @@ function keyReleased() {
   if (gameOver) {
     return
   }
-  
+  if (confirmation == true) {
+      if (keyCode === ESCAPE) {
+        cancelFn()
+        confimg=null
+      } else if (keyCode === ENTER) {
+        confirmFn()
+        confimg=null
+      }
+
+  }
   /*if (tool == 'confirm-PL') {
     if (keyCode === ENTER) {
       neighborhood.distributePowerAnim()
@@ -618,7 +671,7 @@ function mouseClicked() {
   if (gameOver) {
     return
   }
-  if (tool == 'confirm') {
+  if (confirmation == true) {
     if (annoyingconf == false) {
       if (dist(mouseX, mouseY, confx-12.5, confy+25) < 10.5) {
         cancelFn()
@@ -637,13 +690,32 @@ function mouseClicked() {
       }
     }
    }
-  if (dist(mouseX, mouseY, 112*0+29+42, windowHeight-114+42) < 42) {
-    tool = 'build'
-  } else if (dist(mouseX, mouseY, 112*1+29+42, windowHeight-114+42) < 42) {
-    tool = 'select'
-  } else if (dist(mouseX, mouseY, 112*2+29+42, windowHeight-114+42) < 42) {
-    tool = 'pan'
-  } else if (dist(mouseX, mouseY, 112*3+29+42, windowHeight-114+42) < 42) {
+  if (dist(mouseX, mouseY, 91*0+29+31.5, windowHeight-114+31.5) < 31.5) {
+    if (tool == 'build') {
+      tool = 'select'
+    } else {
+      tool = 'build'
+    }
+  } else if (dist(mouseX, mouseY, 91*1+29+31.5, windowHeight-114+31.5) < 31.5) {
+    if (tool == 'repair') {
+      tool = 'select'
+    } else {
+      tool = 'repair'
+    }
+  } else if (dist(mouseX, mouseY, 91*2+29+31.5, windowHeight-114+31.5) < 31.5) {
+    if (tool == 'pan') {
+      tool = 'select'
+    } else {
+      tool = 'pan'
+    }
+  } else if (dist(mouseX, mouseY, 91*3+29+31.5, windowHeight-114+31.5) < 31.5) {
+    if (tool == 'help') {
+      tool = 'select'
+    } else {
+      tool = 'help'
+    }
+  }
+  if (tool == 'help' && dist(mouseX, mouseY, 91*3+29+31.5, windowHeight-140+10.5) < 10.5) {
     window.open("help.html");
   }
   //let block = neighborhood.getBlockFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
@@ -662,19 +734,34 @@ function mouseClicked() {
   // }
 }
 function mousePressed() {
-  if (gameOver || tool == 'confirm') {
+  if (gameOver || confirmation == true) {
     return
   }
+  //if (tool == 'build') {tool = 'select'}
   let pl = neighborhood.getPLineFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef, 30)
-  if (pl != null) {
+  if (pl != null && tool == 'select') {
     selectedPL = pl
     dragging = true
-  } else if ((dist(mouseX, mouseY, 112*1+29+42, windowHeight-114+42) < 42)) {
+  } else if (tool == 'repair' && (dist(mouseX, mouseY, 91*1+29+31.5, windowHeight-140+10.5) < 10.5)) {
     dragging = true
-    tool = 'repair'
-  } else if ((dist(mouseX, mouseY, 112*0+29+42, windowHeight-114+42) < 42)) {
-    dragging = true
-    tool = 'build'
+    //tool = 'repair'
+  } else if (tool == 'build') {
+    if ((dist(mouseX, mouseY, 91*0+29+31.5, windowHeight-140+10.5) < 10.5)) {
+      dragging = true
+      gentype = fossil
+    } else if ((dist(mouseX, mouseY, 91*0+29+31.5-25, windowHeight-140+10.5) < 10.5)) {
+      dragging = true
+      gentype = wind
+    } else if ((dist(mouseX, mouseY, 91*0+29+31.5+25, windowHeight-140+10.5) < 10.5)) {
+      dragging = true
+      gentype = nuclear
+    } else if ((dist(mouseX, mouseY, 91*0+29+31.5-12.5, windowHeight-140+10.5-25) < 10.5)) {
+      dragging = true
+      gentype = hydro
+    } else if ((dist(mouseX, mouseY, 91*0+29+31.5+12.5, windowHeight-140+10.5-25) < 10.5)) {
+      dragging = true
+      gentype = solar
+    } 
   }
 }
 function mouseReleased() {
@@ -728,18 +815,18 @@ function mouseReleased() {
           } else {
             confimg = null
             pos = [pop.x,pop.y]
-            tool = 'confirm'
+            confirmation = true
             confirmFn = function() { 
               neighborhood.distributePowerAnim()
               gamestate.buyPL(ple.len, pop)
               if (pop.powered) {pop.powerOn()}
-              tool = 'select'
+              confirmation = false
               pCost = 0
             }
             cancelFn = function() {
               if (pop.sources.length + pop.destinations.length <= 1) {neighborhood.rmPLine(pop)}
               neighborhood.rmPLineEdge(ple)
-              tool = 'select'
+              confirmation = false
               pCost = 0
           }
            
@@ -754,52 +841,151 @@ function mouseReleased() {
           selectedPL.dispatchCrew(plee, neighborhood, repairSound, gamestate)
         }
     } else if (tool == 'build') {
-      if (gamestate.resource > 4000) {
-        
-        if (gamestate.numGens != 0) { pCost = 4000}
-        pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
-        confimg = hydro
-        confirmFn = function() {
-          gamestate.addGen(pos[0],pos[1],hydro)
-          gamestate.startClock()
-          tool = 'select'
-          pCost = 0
-        } 
-        cancelFn = function() {
-          tool = 'select'
-          pCost = 0
+      if (gentype == hydro) {
+        pCost = 400000
+        if (river.getClosestLerpedPoint(createVector((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef),3).d < 20) {
+          
+          if (gamestate.resource > 400000) {  
+            pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
+            confimg = hydro
+            confirmFn = function() {
+              gamestate.addGen(pos[0],pos[1],hydro,'hydro')
+              gamestate.startClock()
+              confirmation = false
+              pCost = 0
+            } 
+            cancelFn = function() {
+              confirmation = false
+              pCost = 0
+            }
+            confirmation = true
+          } else {
+            //gamestate.info = ''
+            //confirmation = false
+            //pCost = 0
+            //gamestate.desc = 'insufficient funds'
+          } 
+        } else {
+          gamestate.info = 'Unsuitable'
+          gamestate.desc = 'needs water'
         }
-        tool = 'confirm'
-      } else {
-        gamestate.info = ''
-        tool = 'select'
-        pCost = 0
-        //gamestate.desc = 'insufficient funds'
-      }
-    } else if (tool = 'repair') {
+      } else if (gentype == solar) {
+        pCost = 200000
+        if (gamestate.resource > 200000) {
+          
+          pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
+          confimg = solar
+          confirmFn = function() {
+            gamestate.addGen(pos[0],pos[1],solar,'solar')
+            gamestate.startClock()
+            confirmation = false
+            pCost = 0
+          } 
+          cancelFn = function() {
+            confirmation = false
+            pCost = 0
+          }
+          confirmation = true
+        } else {
+          //gamestate.info = ''
+          //confirmation = false
+          //pCost = 0
+          //gamestate.desc = 'insufficient funds'
+        }
+      } else if (gentype == wind) {
+        pCost = 200000
+        if (gamestate.resource > 200000) {
+          
+          pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
+          confimg = wind
+          confirmFn = function() {
+            gamestate.addGen(pos[0],pos[1],wind,'wind')
+            gamestate.startClock()
+            confirmation = false
+            pCost = 0
+          } 
+          cancelFn = function() {
+            confirmation = false
+            pCost = 0
+          }
+          confirmation = true
+        } else {
+          //gamestate.info = ''
+          //confirmation = false
+          //pCost = 0
+          //gamestate.desc = 'insufficient funds'
+        }
+      } else if (gentype == fossil) {
+        pCost = 500000
+        if (gamestate.resource > 500000) {
+          
+          pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
+          confimg = fossil
+          confirmFn = function() {
+            gamestate.addGen(pos[0],pos[1],fossil,'fossil')
+            gamestate.startClock()
+            confirmation = false
+            pCost = 0
+          } 
+          cancelFn = function() {
+            confirmation = false
+            pCost = 0
+          }
+          confirmation = true
+        } else {
+          //gamestate.info = ''
+          //confirmation = false
+          //pCost = 0
+          //gamestate.desc = 'insufficient funds'
+        }
+      } else if (gentype == nuclear) {
+        pCost = 5000000
+        if (gamestate.resource > 5000000) {
+          
+          pos = [(mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef]
+          confimg = nuclear
+          confirmFn = function() {
+            gamestate.addGen(pos[0],pos[1],nuclear,'nuclear')
+            gamestate.startClock()
+            confirmation = false
+            pCost = 0
+          } 
+          cancelFn = function() {
+            confirmation = false
+            pCost = 0
+          }
+          confirmation = true
+        } else {
+          //gamestate.info = ''
+          //confirmation = false
+          //pCost = 0
+          //gamestate.desc = 'insufficient funds'
+        }
+      } 
+    } else if (tool == 'repair') {
       if (gamestate.resource > 3000) { 
         let n = neighborhood.getNodeFromCoords((mouseX - offset.x) / scalef, (mouseY - offset.y) / scalef ,50)
         if (n!= null) {
           pos = [n.pos.x, n.pos.y]
           confimg = repair
-          tool = 'confirm'
+          confirmation = true
           pCost=3000
         }
         confirmFn = function() { 
           let station = new ServiceStation(n, repair, service)
           gamestate.addStation(station)
           station.addCrew(new ServiceTeam())      
-          tool = 'select'
+          confirmation = false
           pCost = 0
         } 
         cancelFn = function() {
-          tool = 'select'
+          confirmation = false
           pCost = 0
         }
       } else {
         gamestate.info = ''
         //gamestate.desc = 'insufficient funds'
-        tool = 'select'
+        //tool = 'select'
         pCost = 0
       }
     }

@@ -1,5 +1,5 @@
 class GameState {
-    constructor(n, c, s, r = 100000, cost = this.cost1, income = this.income2) {
+    constructor(n, c, s, r = 500000, cost = this.cost1, income = this.income2) {
         this.neighborhood = n
         this.season = 'fall'  
         this.colorScheme = c
@@ -18,6 +18,10 @@ class GameState {
         this.startupTime = 30 * this.cyclesPerStep
         this.active = false
         this.numGens = 0
+        this.loadfactor = 0.5
+        this.genUpkeep = 0
+        this.loadVar = 0
+        this.solarPanels = []
         this.next = 'winter'
         this.mm = 9
         this.yyyy = 1981
@@ -56,14 +60,18 @@ class GameState {
         case 'fall':
             this.changeSeason('winter')
             this.next = 'spring'
+            this.solarPanels.forEach(s=>s.active = true)
             break
         case 'winter':
             this.changeSeason('spring')
             this.next = 'summer'
+            this.loadfactor += this.loadVar
             break
         case 'spring':
             this.changeSeason('summer')
             this.next = 'fall'
+            this.loadfactor -= this.loadVar
+            this.solarPanels.forEach(s=>s.active = false)
             break
         case 'summer':
             this.changeSeason('fall')
@@ -77,7 +85,7 @@ class GameState {
         } else {
             this.cost = Math.round(250 * this.neighborhood.pl.length / this.cyclesPerStep) + Math.round((this.numGens-1) * 2000 / this.cyclesPerStep / 2) +  Math.round((this.neighborhood.stations.length-1) * 2000 / this.cyclesPerStep / 2)
             this.resource -= Math.round(250 * this.neighborhood.pl.length / this.cyclesPerStep) //load
-            this.resource -= Math.round((this.numGens-1) * 2000 / this.cyclesPerStep / 2)
+            this.resource -= Math.round((this.genUpkeep-1) * 2000 / this.cyclesPerStep / 2) //~22 per gen
             this.resource -= Math.round((this.neighborhood.stations.length-1) * 2000 / this.cyclesPerStep / 2)
             if (this.neighborhood.stations.length == 0) {
                 this.cost -= Math.round((this.neighborhood.stations.length-1) * 2000 / this.cyclesPerStep / 2) 
@@ -110,7 +118,7 @@ class GameState {
         this.income = Math.round(this.activeArea/8/this.cyclesPerStep) - this.cost
     }
     income2() {
-        let num = Math.round(5*this.industrialArea * this.residentialArea /(this.industrialArea + this.residentialArea+1) /8 / this.cyclesPerStep)
+        let num = Math.round(8*this.industrialArea * this.residentialArea /(this.industrialArea + this.residentialArea+1) /8 / this.cyclesPerStep)
         this.resource += num
         this.income = num //- this.cost
     }
@@ -120,12 +128,44 @@ class GameState {
         pl.active = true
     }
 
-    addGen(x, y, img) {
+    addGen(x, y, img, type='hydro') {
         this.numGens++
-        if (this.numGens > 1) {
-            this.resource -= 4000
+        let gen = new PowerGenerator(x, y, img, type)
+        switch (type) {
+            case 'hydro':
+                this.loadfactor+= 0.5
+                this.resource -= 400000
+                this.genUpkeep += 1
+                break
+            case 'fossil':
+                this.loadfactor+= 0.6
+                this.resource -= 500000
+                this.genUpkeep += 1.5
+                break;
+            case 'nuclear':
+                this.loadfactor+= 10
+                this.resource -= 5000000
+                this.genUpkeep += 10
+                break
+            case 'solar':
+                this.loadfactor+= 0
+                this.resource -= 200000
+                this.genUpkeep += 0.6
+                this.solarPanels.push(gen)
+                break
+            case 'wind':
+                this.loadfactor+= 0
+                this.resource -= 200000
+                this.genUpkeep += 0.7
+                this.loadVar = 0.5
+                break
+            default:
+                this.loadfactor+= 1
+                this.resource -= 4000
+                this.genUpkeep += 1
         }
-        let gen = new PowerGenerator(x, y, img)
+
+        
         this.neighborhood.addPLine(gen)
     }
     addStation(station) {
@@ -137,7 +177,7 @@ class GameState {
     }   
 
     calculateLoad() {
-        this.load = this.activeArea / this.numGens
+        this.load = this.activeArea / this.loadfactor
         this.load *= 1.25
     }
     failure() {
@@ -160,6 +200,9 @@ class GameState {
             //this.desc = "Line Down"
         }
     }
+    win() {
+
+    }
 
 
     async timestep(iteratenet){
@@ -176,6 +219,9 @@ class GameState {
             if (this.step % (20*this.cyclesPerStep)==0) {
                 this.incrementDate()
             }
+            if (this.resource > 10000000 || this.step > 12*(60*this.cyclesPerStep-5)) {
+                this.win()
+            }
             if (this.step% (60*this.cyclesPerStep) == 0) {
                 this.nextSeason(this.season)
                 iteratenet()
@@ -188,6 +234,7 @@ class GameState {
             if (this.step % this.cyclesPerStep == 0) {
                 this.neighborhood.blocks.forEach(b=> b.decay())
             }
+
         }
     }
 

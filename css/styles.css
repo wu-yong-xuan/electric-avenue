@@ -1,0 +1,124 @@
+@font-face {
+    font-family: 'DINExp';
+    src: url('../font/D-DINExp-Bold.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Reihborn Display';
+    src: url('../font/rheiborn-display.ttf') format('truetype');
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background: radial-gradient(circle at 20% center, #02C3F3, #00162A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DINExp', sans-serif;
+    color: white;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.left-column {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.logo {
+    max-width: 100%;
+    height: auto;
+}
+
+.right-column {
+    flex: 2;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.right-column p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-family: 'Reihborn Display', sans-serif;
+    font-size: 1.5rem;
+    background-color: transparent;
+    color: #4CFF5D;/*rgb(238, 185, 116); /* Orange color for text */
+    border: 2px solid #4CFF5D;/*rgb(238, 185, 116); /* Orange border */
+    border-radius: 6px; /* Rounded corners */
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button:hover {
+    background-color: #4CFF5D; /* Orange background on hover */
+    color: white;
+}
+
+.city-name-input {
+    margin-bottom: 20px;
+}
+
+.city-name-input input {
+    padding: 5px 10px;
+    font-size: 1rem;
+    margin-right: 10px;
+    width: 200px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .left-column, .right-column {
+        padding: 10px;
+        flex: none;
+    }
+
+    .right-column p {
+        font-size: 1rem;
+    }
+
+    button {
+        font-size: 1.2rem;
+        padding: 8px 16px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .right-column p {
+        font-size: 0.9rem;
+    }
+
+    button {
+        font-size: 1rem;
+        padding: 6px 12px;
+    }
+}
