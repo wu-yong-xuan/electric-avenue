@@ -508,44 +508,47 @@
                 Wow, we learned so many different sampling techniques, how cool. Ren would be (not) proud of us. We implemented pixel sampling, level sampling, and supersampling. Pixel sampling has the greatest speed, least memory usage and worst antialiasing power. Level sampling is faster than supersampling, but slower than pixel sampling. It also has the most memory usage and antialiasing power better than pixel sampling and worse than supersampling. Supersampling is the slowest, but best at antialiasing. In terms of memory usage, it sits right between the other two methods. As one can see, each method has its drawbacks and depending on the use case, one may be preferred over another.
             </p>
 
-            <table style="width: 100%; text-align: center; border-collapse: collapse;">
-                <thead>
+            <div style="display: flex; justify-content: center">
+                <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th>Bilinear Interpolation</th>
+                            <th>Nearest Neighbor Interpolation</th>
+                        </tr>
+                    </thead>
                     <tr>
-                        <th>Nearest Neighbor Sampling</th>
-                        <th>Bilinear Interpolation</th>
+                        <td style="text-align: center;">
+                            <img src="images/task6 (1).png" width="400px" />
+                            <figcaption>Level 0</figcaption>
+                        </td>
+                        <td style="text-align: center;">
+                            <img src="images/task6 (2).png" width="400px" />
+                            <figcaption>Level 0</figcaption>
+                        </td>
                     </tr>
-                </thead>
-                <tr>
-                    <td style="text-align: center;">
-                        <img src="images/task6 (1).png" width="400px" />
-                        <figcaption>Level 0</figcaption>
-                    </td>
-                    <td style="text-align: center;">
-                        <img src="images/task6 (2).png" width="400px" />
-                        <figcaption>Level 0</figcaption>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: center;">
-                        <img src="images/task6 (3).png" width="400px" />
-                        <figcaption>Nearest Mipmap</figcaption>
-                    </td>
-                    <td style="text-align: center;">
-                        <img src="images/task6 (4).png" width="400px" />
-                        <figcaption>Nearest Mipmap</figcaption>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align: center;">
-                        <img src="images/task6 (5).png" width="400px" />
-                        <figcaption>Linear Interpolation Mipmap</figcaption>
-                    </td>
-                    <td style="text-align: center;">
-                        <img src="images/task6 (6).png" width="400px" />
-                        <figcaption>Linear Interpolation Mipmap</figcaption>
-                    </td>
-                </tr>
-            </table>
+                    <tr>
+                        <td style="text-align: center;">
+                            <img src="images/task6 (3).png" width="400px" />
+                            <figcaption>Nearest Mipmap</figcaption>
+                        </td>
+                        <td style="text-align: center;">
+                            <img src="images/task6 (4).png" width="400px" />
+                            <figcaption>Nearest Mipmap</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">
+                            <img src="images/task6 (5).png" width="400px" />
+                            <figcaption>Linear Interpolation Mipmap</figcaption>
+                        </td>
+                        <td style="text-align: center;">
+                            <img src="images/task6 (6).png" width="400px" />
+                            <figcaption>Linear Interpolation Mipmap</figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
         </div>
 	</body>
 </html>
