@@ -1,0 +1,377 @@
+<html>
+<head>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        h1 {
+            text-align: center;
+        }
+
+        .rainbow {
+            background-image: linear-gradient(to bottom right, #8da4e3, #5a71b0);
+            color: transparent;
+            background-clip: text;
+        }
+
+        .container {
+            margin: 0 auto;
+            padding: 60px 20%;
+            max-width: 1000px;
+        }
+
+        figure {
+            text-align: center;
+        }
+
+        img {
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        body {
+            font-family: 'Comic Neue', sans-serif;
+            font-size: larger;
+            background-color: floralwhite;
+        }
+
+        p {
+            line-height: 2rem;
+        }
+
+        h2, h3 {
+            margin-top: 3rem;
+        }
+
+        code {
+            font-size: 1rem;
+        }
+
+        img {
+            border: 1px solid #96a1a3;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CS184/284A Spring 2025 Homework 2 Write-Up</h1>
+        <h1 class="rainbow" style="text-align: center;">Han Li & William Wu</h1>
+
+        <br>
+
+        Link to webpage: <a href="https://wu-yong-xuan.github.io/cs184/hw2/index.html">wu-yong-xuan.github.io/cs184/hw2/index.html</a>
+
+        <br>
+
+        Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw2-_-3">cal-cs184-student/sp25-hw2-_-3</a>
+
+        <!--
+    We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
+    -->
+
+        <h2>Overview</h2>
+
+        <p>
+            In this assignment, we took a look at bezier surfaces to evaluate curved surfaces. We implemented 1d bezier curves, and then using that, we created 3d geometry using bezier surfaces. Additionally, we implemented some simple mesh geometry modification systems to flip edges and subdivide triangles. Using that, we implemented the loop subdivision algorithm in other to subdivide our mesh and create a better smooth surface.
+        </p>
+
+        <p>
+            The algebra is honestly so much easier to implement in code than to understand with math notation tbh.
+        </p>
+
+        <h2>Section I: Bezier Curves and Surfaces</h2>
+
+        <h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
+
+        <p>
+            So word's on the street that you're looking for the good stuff. Not the straight lines that everyone else seems to be smoking, but true, raw, unadultured, curvy bezier curves. Well, you've come to just the right place. We can get you sorted right on up, Casteljau's style.
+        </p>
+
+        <p>
+            A bezier curve consists of multiple control points, and through a series of interpolations, we can arrive at a point on our final curve. Let's start off with an example with 4 control points, \(b_0, b_1, b_2, b_3\). We can denote points \(b_0^1, b_1^2, b_2^3\) as the linear interpolation between the original first degree points. Expanding this interpolation recursively, we can then interpolate between \(b_0^1, b_1^2, b_2^3\) instead, and so on and so forth until we get to our final point \(p\). By graphing that point across all points of interpolation, we arrive at our final bezier curve.
+        </p>
+
+        <p>
+            To implement this programmatically, we take the ordered list of points of the bezier curve, and then loop through them. We can then interpolate between each pair of points in the array and save that to a return array. This will give us the 1 step interpolation of the bezier curve. Simply repeat this until you only have 1 point and voila! We got our bezier curve.
+        </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/image15.png" width="400px" />
+                        <figcaption>Step 0</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/image7.png" width="400px" />
+                        <figcaption>Step 1</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/image3.png" width="400px" />
+                        <figcaption>Step 2</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/image9.png" width="400px" />
+                        <figcaption>Step 3</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/image11.png" width="400px" />
+                        <figcaption>Step 4</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/image16.png" width="400px" />
+                        <figcaption>Step 5</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/image13.png" width="400px" />
+                        <figcaption>Final 1</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/image4.png" width="400px" />
+                        <figcaption>Final 2</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <figure>
+            <img src="images/bezieraa.png" alt="" style="width:100%" />
+            <figcaption>Slightly different bezier curve</figcaption>
+        </figure>
+
+        <h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
+
+        <p>
+            Those 1D bezier curves were no joke, just as good as you had dreamed, but still not enough. Despite their elegance and exquisiteness, your hunger remains unsated, your thirst unquenched. You began a journey on a quest to find the purest curve. After traveling on foot for what feels like an eternity, through hell and back, you've finally found it, the bezier surface.
+        </p>
+        <p>
+            A bezier surface is essentially just a 2D array of control points in which each row of the array defines a single 1D bezier curve. Taking all the 1D bezier curves defined by the rows, we then can interpolate between them and generate a new bezier curve using the points defined by the array of beziers.
+        </p>
+        <p>
+            More specifically, To find a point on the bezier surface, we had to consider two parameters \((u,v)\) to characterize the position of the point along the bezier curves. Using the de Casteljau algorithm with the parameter \(u\), we can generate a point along each bezier curve defined by the rows of the array. Using the points from each row as control points of another bezier curve, we can use de Casteljau again to get the point at position \(v\) to get our point on the bezier surface. Do this for each point along the curve and voila! Your very own bezier surface.
+        </p>
+
+        <figure>
+            <img src="images/image18.png" alt="Teapot" style="width:100%" />
+            <figcaption>Teapot</figcaption>
+        </figure>
+
+        <h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
+
+        <h3>Part 3: Area-weighted vertex normals</h3>
+
+        <p>
+            Once you've tasted 2 dimensions, you're gonna be craving for 3 dimensions. Unfortunately, most of the cheap stuff you get nowadays is all tessellated. We want the smooth stuff for your smooth brain. Here, we want to be able to average vertex normals based on the surrounding face normals, weighted based on the size of those faces.
+        </p>
+
+        <p>
+            To implement it, by using a combination of the <code>twin</code> and <code>next</code> operators for the half edges, we can go through all the adjacent faces of any given vertex.
+        </p>
+
+        <p>
+            For each adjacent face, calculating the cross product between any 2 half edges of the face will give you the face normal vector with a magnitude of \(2 * \text{the area of the triangular face}\). Simply dividing it by 2 will give you a normal vector with the correct magnitude. Doing this for each triangular adjacent face, we can then sum the vectors and normalize the final vector.
+        </p>
+
+        <p>
+            One thing to note is that since the half-edges are organized counterclockwise, taking the cross product will always give you a positive normal vector, ensuring that our normal is pointing in the right direction.
+        </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/image12.png" width="400px" />
+                        <figcaption>Rough Teapot</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/image8.png" width="400px" />
+                        <figcaption>Smooth Teapot</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+
+        <h3>Part 4: Edge flip</h3>
+        <p>
+            I'm sure you're very familiar with edges in the present progressive tense. Putting your behavior aside though, let's talk about flipping! Instead of flipping people off, let's use those skills to flip other things as well. No, not burgers even though you might need the practice as a CS major. I'm talking about flipping edges.
+        </p>
+        <figure>
+            <img src="images/image17.png" alt="Edge Flip Diagram" style="width:100%" />
+            <figcaption>Edge Flip Diagram</figcaption>
+        </figure>
+        <p>
+            To flip an edge is actually pretty simple, albeit kinda annoying. Essentially, you just follow this diagram. For example, for h0, you can have it point towards v3 instead. Then you can go and fix everything else. YeahÅc it's kinda simple but also very tedious to do. :D
+        </p>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/image1.png" width="400px" />
+                        <figcaption>Teapot</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/image6.png" width="400px" />
+                        <figcaption>Flipped Teapot</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3>Part 5: Edge split</h3>
+        <p>
+            Man, all those flipping edges are a flipping pain. I donÅft want to point fingers but all those pointer reassignments are flipping annoying. You must want to utterly rip them apart and split them in half. Well have I got news for you! Now introducing edge splits, for the cost of only a ton more pointer assignments, you can split the flipping edges in half.
+        </p>
+
+        <p>
+            Splitting an edge is very similar to flipping one, itÅfs a long long list of pointer reassignments, but before that you have to create a couple new elements. Specifically, one new vertex (whose position is just the average of the positions of the vertices connected by the edge), three new edges, and six new half edges. When creating the new vertices and edges, we set a parameter isNew to true (except for <code>e5</code> in the diagram, where itÅfs set to false because itÅfs part of the original edge that was split) which will make Loop subdivision easier later. After saving references to each relevant object (all vertices, edges, faces, and half edges), we reassign all the pointers accordingly to the following diagram (ie. <code>h5->next() = h10</code>).
+        </p>
+
+        <figure>
+            <img src="images/image14.png" alt="Edge Flip Diagram" style="width:100%" />
+            <figcaption>Edge Split Diagram</figcaption>
+        </figure>
+
+        <br />
+        <figure>
+            <img src="images/image5.png" alt="Edge Flip Diagram" style="width:400px" />
+            <figcaption>Teapot</figcaption>
+        </figure>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/image2.png" width="400px" />
+                        <figcaption>Only Splits</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/image10.png" width="400px" />
+                        <figcaption>Splits and Flips</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3>Part 6: Loop subdivision for mesh upsampling</h3>
+        <p>
+            Now that we can split the flipping edges, we can be absolutely diabolical and split every flipping edge. Turns out we can do this ethically using a mesh upsampling algorithm called Loop Subdivision for some computer graphics applications that donÅft involve vengeance against edges.
+        </p>
+        <p>
+            Loop subdivision involves two steps: a 4-1 subdivision of each triangle in the mesh, followed by updating each vertex position. To do this, we actually calculated the new vertex positions first and stored them for later use so we wouldnÅft have to traverse more triangles. We iterated through each vertex in the triangle and calculated the new position using the following formula:
+        </p>
+        <div style="display: flex; justify-content: center">
+            \((1 - n \cdot u) \cdot \text{original_position} + u \cdot \text{original_neighbor_position_sum}\)
+        </div>
+        <p>
+            Where \(n\) is the vertex degree, \(u\) is equal to \(\frac{3}{16}\) if \(n=3\) and \(\frac{3}{8n}\) otherwise, \(\text{original_position}\) is the original position of the vertex, and \(\text{original_neighbor_position_sum}\) is the sum of positions of all neighboring vertices. This gives us the new position which we saved to a variable in the vertex object. We also set <code>isNew</code> to <code>false</code> for each vertex as we iterate through.
+        </p>
+        <p>
+            Then, we iterated through all the edges of the mesh and calculated the positions of all the new vertices to be created when doing the 4-1 subdivisions using the following formula where the capital letters denote the positions of the corresponding vertex:
+        </p>
+        <div style="display: flex; justify-content: center">
+            \(\frac{3}{8} \cdot (A + B) + \frac{1}{8} \cdot (C + D)\)
+        </div>
+
+        <figure>
+            <img src="images/loop0.png" alt="Loop Split Diagram" style="width:50%" />
+            <figcaption>Loop Split Diagram</figcaption>
+        </figure>
+
+        <p>
+            We saved these new positions to a variable in the corresponding edge to be cut. We also set <code>isNew</code> for each edge to be <code>false</code> as we do this.
+        </p>
+        <p>
+            We then split every edge in the mesh. We do this by iterating through every existing edge in the mesh, opting to iterate using a counter with the max being the current number of edges. Because the mesh implementation adds new items to the end of a list, any new objects made using split will not be iterated through this way. As we iterate through, if <code>isNew</code> for an edge is <code>false</code> (should always be <code>true</code>, but just in case a new edge somehow gets iterated over we included the statement), we split the edge and save the adjusted position of the new vertex that we stored previously in the edge into a variable in the newly made vertex. We already set isNew to true for the new vertex and new edges in our split function so we do not have to worry about that.
+        </p>
+        <p>
+            Then, we iterated through the edges again and flipped any new edge that connects an old and new vertex. Finally, we iterated through every vertex and set the vertexÅfs position to the stored adjusted position. After all that, we get a Loop subdivided mesh!
+        </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/loop2.png" width="400px" />
+                        <figcaption>Teapot</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/loop4.png" width="400px" />
+                        <figcaption>Subdivided Teapot</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>
+            When subdividing a mesh, sharp corners and edges get smoothed out. We can reduce this effect by pre-splitting edges near the edges and corners that we want to stay sharp.
+        </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/loop1.png" width="400px" />
+                        <figcaption>Teapot</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/loop3.png" width="400px" />
+                        <figcaption>Subdivided Teapot</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>
+            We can notice how if we subdivide a default cube using the Loop algorithm, it comes out assymetrically. This is the expected behavior for the Loop algorithm as with a low poly cube like this especially, the asymmetry of the direction of the edges across each face creates a skew in the direction of the location of the newly created vertices.
+        </p>
+        <p>
+            To remedy this, we can instead split all the face edges first so that they form X's. This will ensure symmetry before we subdivide
+        </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/cube1.png" width="400px" />
+                        <figcaption>Default Cube</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/cube3.png" width="400px" />
+                        <figcaption>Default Cube Subdivide</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/cube2.png" width="400px" />
+                        <figcaption>Preprocessed Cube</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/cube4.png" width="400px" />
+                        <figcaption>Preprocessed Cube Subdivide</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
+        Here is Mel-chan, UCBUGG's mascot!
+
+        <figure>
+            <img src="images/melchan.png" alt="Mel-chan" style="width:100%" />
+            <figcaption>Mel-chan</figcaption>
+        </figure>
+    </div>
+</body>
+</html>
