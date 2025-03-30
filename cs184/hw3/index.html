@@ -1,0 +1,670 @@
+<html>
+<head>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+
+        h1 {
+            text-align: center;
+        }
+
+        .rainbow {
+            background-image: linear-gradient(to bottom right, #8da4e3, #5a71b0);
+            color: transparent;
+            background-clip: text;
+        }
+
+        .container {
+            margin: 0 auto;
+            padding: 60px 20%;
+            max-width: 1000px;
+        }
+
+        figure {
+            text-align: center;
+        }
+
+        img {
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        body {
+            font-family: 'Comic Neue', sans-serif;
+            font-size: larger;
+            background-color: floralwhite;
+        }
+
+        p {
+            line-height: 2rem;
+        }
+
+        h2, h3 {
+            margin-top: 3rem;
+        }
+
+        code {
+            font-size: 1rem;
+        }
+
+        img {
+            border: 1px solid #96a1a3;
+            border-radius: 10px;
+        }
+    
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CS184/284A Spring 2025 Homework 3 Write-Up</h1>
+        <h1 class="rainbow" style="text-align: center;">Han Li &amp; William Wu</h1>
+
+        <br>
+
+        Link to webpage: <a href="https://wu-yong-xuan.github.io/cs184/hw3">wu-yong-xuan.github.io/cs184/hw3</a>
+        Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw3-m-0w0-m">cal-cs184-student/sp25-hw3-m-0w0-m</a>
+        <!--
+    We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
+    -->
+
+        <h2>Overview</h2>
+        In this homework, we made a suuuper cool pathtracer alongside acceleration structures so many computer doesn't explode. This pathtracer simulates direct and indirect light bounces for diffuse surfaces. This homework was super cool to do, albiet the amount of renders we had to do was kinda crazy.
+
+        <h2>Part 1: Ray Generation and Scene Intersection</h2>
+        <p>
+            In the beginning, there was darkness. Then, a voice said, let there be light! Fiat lux! Unfortunately, there were no eyeballs to witness the view. Thankfully, since we're CS majors, we don't need eyeballs. We can code a virtual camera to see the world for us!
+        </p>
+
+        <p>
+            In the real and scary world, rays of light emit from light sources and bounce around, some of which hit our eyeballs and the neurons and synapses in our brain register that as color. Unfortunately, we live in the matrix so that doesn't necessarily apply here. The real world is computationally expensive, so here in the matrix, we gotta find something more efficient.
+        </p>
+        <p>
+            Instead, let us shoot rays from our eyeballs out into the world and trace these rays backwards. This ensures we only do calculations that we can see. Given a camera origin and an image plane that lies in front of the camera, we can shoot rays from the camera origin to every pixel on the image plane. The number of rays we shoot out per pixel is based on our sample amount, and using a grid sample function, we can shoot rays uniformly randomly at different points of the pixel.
+        </p>
+        <p>
+            Shooting out rays like pew pew lasers star wars is cool and all, but if those rays can't collide with anything, then we can't collect the radiance from it. Specifically, we want to have our rays be able to collide with triangles.
+        </p>
+        <p>
+            A ray is defined with an origin vector and a direction vector, and it can written as follows
+            \(r(t)=o+td\)
+        </p>
+        <p>
+            One neat thing to note is that a triangle is the only shape in 3 dimensions that is completely planar, and thus, can be defined uniquely by a plane. A plane can be thought of with the following equation
+            \(p:(p-p')\cdot N=0\)
+            Replacing \(p=r(t)\), we can then solve for \(t\) in the ray equation. With that, we can decide whether the \(r(t)\) lies within the triangle by doing a simple triangle test.
+        </p>
+        <p>
+            This is cool and all, but our robot overlords are complaining that it's too slow and they want an even more efficient method!
+        </p>
+        <p>
+            Introducing the Moller Trumbore Algorithm.
+        </p>
+        <p>
+            Given that we can define any point of a triangle with barycentric coordinates, we can find some unique properties. Note that when \(\alpha\) or \(\beta\) are negative, the point is outside of the triangle. Same with if \(\alpha + \beta > 1\). To determine these coefficients, we can note set the ray equation equal to the barycentric equation for the triangle, giving us
+            \(\vec{O}+t\vec{D}=(1-\alpha -\beta)\vec{P}_0+\alpha \vec{P}_1+\beta \vec{P}_2\)
+        </p>
+        <p>
+            Rewriting this in matrix form (and screenshotting this from the lecture slides since I'm too lazy to rewrite the math in latex). Note that these images use \(b_1\) and \(b_2\) instead of \(\alpha\) and \(beta\). It's confusing, I'm not sorry.
+        </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/Capture.png" width="400px" />
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/Capture1.png" width="200px" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>
+            Once we solve for the barycentric coordinates, we can do the check mentioned earlier, and if it's satisfied, then we can use the \(t\) value to solve for \(r(t)\). It's a simple algorithm in concept, but the math is a bit scary with all the fancy symbols.
+
+        </p>
+
+        <p>
+            The important thing here, is that after we intersect with a triangle, we want to set the <code>max_t</code>> to the <code>t</code> we found. That way we can ignore any future intersections with triangles that are farther away from the current closest intersection.
+
+        </p>
+
+        <p>
+            Intersecting a sphere is even simpler. A sphere can be defined as \(p:(p-c)^2-R^2=0\). Plugging in the ray equation for \(p\), we can simply solve a quadratic equation to get 2 values of \(t\). The math is left as an exercise for the reader.
+
+        </p>
+
+        <p>
+            The interesting thing to note is that here we get two \(t\) values, so we want to get the smaller one which is the side of the sphere that hits the ray first.
+        </p>
+
+        <p>
+            Here are some images rendered with normal based shaded!
+        </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="images/Task1/CBcoil.png" width="400px" />
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="images/Task1/CBgems.png" width="400px" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h2>Part 2: Bounding Volume Hierarchy</h2>
+
+        <p>
+            With our cool triangle intersection algorithm, we dazzled our cyber overlords with amazing spectacles. Unfortunately, it takes us 10 years to so each time and they want it harder, better, faster, stronger.
+        </p>
+
+        <p>
+            So it's time for us to work it, make it, do it, makes us, harder, better, faster, stronger.
+        </p>
+
+        <p>
+            We'll do something called constructing a BVH, or a bounding volume hierarchy. The high level overview is to partition the mesh into different bounding volumes, such that we can ignore all bounding volumes and thus, their subsequent triangles, that we do not hit with the ray.
+        </p>
+
+        <p>
+            The BVH itself is a recursive structure, thus the hierarchy of bounding volume hierarchy. Each bounding volume itself contains bounding volumes until the final volume contains at most our specified triangle limit. We construct our BVH by finding the bounding volume across first, the entire mesh. Then, we split it into two child volumes. The child volumes here are axis aligned, but how do we know what axis to split it?
+
+        </p>
+
+        <p>
+            Generally speaking, we want to split the bounding volume along the longest axis. We want to minimize having long thin strips. All we need to do is find the <code>extend</code> of each axis, find which axis is the longest, and split it that way. We can then partition all of the triangles within each resulting side of the split into their own corresponding BVHs.
+
+        </p>
+
+        <p>
+            To avoid having to create new data structures, we implemented an in-place sorting algorithm for the primitives. We keep a counter of the number of primitives on the left hand side as we iterate through all the primitives of the parent bounding volume. If the current index is greater than the counter for the # of primitives on the left bounding volume, AND the current primitive is supposed to be on the left bounding volume, then we simply need to swap those two positions. This algorithm will partition all the primitives such that all the ones on the left are grouped together and all the ones on the right are grouped together.
+        </p>
+
+        <p>
+            We repeat the construction until the BVH minimum triangle conditions are satisfied.
+        </p>
+
+        <p>
+            An important thing to note here is to make sure that there is never an instance where one side of the partition has 0 triangles or else it would cause an infinite loop. To resolve this, if that condition happens, we instead just split the primitives at half the length of the array instead.
+        </p>
+
+        <figure>
+            <img src="images/Task2_0.png" alt="BVH speed comparison" style="width:70%" />
+            <figcaption>BVH speed comparison</figcaption>
+        </figure>
+
+        <figure>
+            <img src="images/Task2/cow.png" alt="Cow Normal Render" style="width:70%" />
+            <figcaption>Cow Normal Render</figcaption>
+        </figure>
+
+        <h2>Part 3: Direct Illumination</h2>
+        <p>
+            Yet, even with eyes on our head and objects in the cyber city, we still saw nothing. The darkness grew in our very souls and we began to lose hope. At our wits end, we remembered the first couple lines of task one: "In the beginning, there was darkness. Then, a voice said, let there be light!" We need lights! Thus, to create an image in our camera, we needed to shoot some rays, pew pew. To do this, we first needed to implement a diffuse BSDF, so we know how light interacts with objects in our frame. The BSDF tells us how much of the light coming from some solid angle \(w_in\) is redirected in a specific direction (w_out). A diffuse BSDF for a lambertian shader just disperses incident light equally across a hemisphere normal to the surface. Thus, the BSDF is given by
+            \(f(\omega_i,\omega_o) = \frac{\text{albedo}}{\pi}\)
+        </p>
+
+        <p>
+            If both w_in and w_out are within the hemisphere and 0 otherwise.
+        </p>
+
+        <p>
+            Now that we have the BSDF, we implemented direct illumination. This consisted of finding the zero bounce radiance as well as the single bounce radiance a pixel on the camera receives. To find the zero bounce radiance, we cast a ray from the camera and check the first object it hits. Grabbing the emission value from the surface's BSDF, we get the radiance that goes into the camera directly from the lights.
+        </p>
+
+        <p>
+            But, this only lets us see the lights, which is quite uninteresting. Thus, we then implemented hemisphere sampling for direct illumination resulting from one bounce. We implemented it in the following way:
+        </p>
+
+        <ul>
+            <li>Once we've casted our first ray and detected intersections, we pass that information into our one bounce function</li>
+            <li>
+                Repeat num_samples times
+                <ul>
+                    <li>Sample a random <code>w_i</code> (in object coords) using <code>hemisphere_sample->get_sample()</code></li>
+                    <li>Create a new ray at the intersection point pointing in the <code>w_i</code> direction (in world coords)</li>
+                    <li>Initialize <code>min_t = EPS_F</code> to avoid casting a ray into itself</li>
+                    <li>Then cast this new ray and check for intersections</li>
+                    <li>If it does intersect with something, we can find the emission of the object the ray hits</li>
+                    <li>
+                        The radiance that is reflected at the point back into the camera is given by
+                        <ul>
+                            <li>\(\frac{f(\omega_i,\omega_o) \cdot \text{emission} \cdot \cos(w_i) }{pdf}\)</li>
+                            <li>Where pdf is the probability density function of sampling the direction <code>w_i</code></li>
+                            <li>For a diffuse BSDF this is just \(\frac{1}{2\pi}\)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>We add up all the radiances from each sample and divide by num_samples to get the average radiance reflected back to the camera from the point we raycasted to. </li>
+        </ul>
+
+        <p>This implementation was okay, but oh so noisy and it took a long time to converge. In order to create a more efficient implementation, we decided to use importance sampling. Our implementation is as follows: </p>
+
+        <ul>
+            <li>
+                For each light
+                <ul>
+                    <li>If it's a point source, only sample once otherwise set <code>num_samples</code> to <code>ns_area_light</code></li>
+                    <li>We used <code>sample_L</code> to sample an emission value given a hit point. This function also samples <code>w_i</code> (world coords) and outputs it along with the pdf of the sample and the distance to the light</li>
+                    <li>
+                        We first convert <code>w_i</code> in object coords to see if the light source is behind the object. If it is, we know no light should reach the point
+                    </li>
+                    <li>
+                        If the light source isn't behind the object, we create a new ray at the hit point in the <code>w_i</code> (world coords) direction
+                    </li>
+                    <li>
+                        We initialize <code>min_t = EPS_F</code> and <code>max_t = dist - EPS_F</code> where <code>dist</code> is the distance from the hit point to the light
+                    </li>
+                    <li>We then check if the ray intersects anything before the light source and, if it does, we return 0 radiance. </li>
+                    <li>
+                        If it doesn't we get the radiance reflected back to the camera
+                        <ul><li>\(\frac{f(\omega_i,\omega_o) \cdot \text{emission} \cdot \cos(w_i) }{pdf}\)</li></ul>
+                    </li>
+                    <li>We do this <code>num_sample</code> times and then average the radiances</li>
+                </ul>
+            </li>
+        </ul>
+
+        <p>Hooray! Now we have direct illumination. We can now see lights and shadows.</p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task3/bunny_1_1_noH.png" width="400px" />
+                            <figcaption>1 camera sample, 1 light sample, importance sampling</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task3/bunny_1_1_H.png" width="400px" />
+                            <figcaption>1 camera sample, 1 light sample, hemisphere sampling</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task3/bunny_64_32.png" width="400px" />
+                            <figcaption>64 camera samples, 32 light samples, importance sampling</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task3/bunny_64_32_H.png" width="400px" />
+                            <figcaption>64 camera samples, 32 light samples, importance sampling</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>You can clearly notice how in uniform hemisphere sampling, the image is incredibly noisy and especially with only 1 light sample, most of the pixels are in the dark. This is obvious since with only 1 light sample, the chance that a given point's ray hits the light in the entire hemisphere is very low.</p>
+
+        <h3>Noise Level Comparison</h3>
+        Importance Sampling w/ 1 camera sample
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task3/bunny_1l_1s.png" width="400px" />
+                            <figcaption>1 light sample</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="images/Task3/bunny_16l_1s.png" width="400px" />
+                            <figcaption>16 light samples</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task3/bunny_4l_1s.png" width="400px" />
+                            <figcaption>4 light samples</figcaption>
+                        </figure>
+
+                        <figure>
+                            <img src="images/Task3/bunny_64l_1s.png" width="400px" />
+                            <figcaption>64 light samples</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>Within the shadow of the bunny, you can notice how the more light samples there are, the better the result is for the creating the soft shadow. With low light samples, the result is very noisy.</p>
+
+        <h2>Part 4: Global Illumination</h2>
+
+        <p>In our effort to fly like icarus and bring the light of the sun in all its glory to our mangled cybercity, we need to do a better job at calculating the light rays. Specifically, we need to not stop those light rays from bouncing after just 1 bounce, but have them <b>INFINITELY</b> bounce! Just kidding, my potato laptop cannot handle that. Instead, we will sample the radiance at every given bounce object until a given limit.</p>
+
+        <p>
+            To do this, for each bounce, we calculate the one bounce radiance as well as a recursive call to itself. This recursive call takes in a sampled ray direction at the point of intersection and increases the ray depth by one. The result of this recursive call is multiplied by <code>*fracRadiance*cos_theta(win)/pdf/cpdf</code> in order to normalize the radiance gained.
+        </p>
+
+        <p>We multiply by the fractional radiance returned by the sample function as well as the the angle of the sampled ray. Dividing by the pdf ensures we normalize the light by the chance that particular direction was chosen</p>
+
+        <p>The cpdf is the chance that ray continues to live on via russian roulette. Russian roulette is the process of estimating the early termination of ray bounces in order to speed up render times. If we're at the max ray depth, we simply need to return the one bounce radiance.</p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_direct.png" width="400px" />
+                            <figcaption>Direct light only</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_indirect.png" width="400px" />
+                            <figcaption>Direct + indirect light</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_direct.png" width="400px" />
+                            <figcaption>Direct light only</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/CBbunny_indirect_only.png" width="400px" />
+                            <figcaption>Only indirect light, 1 ray depth</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>You can see how in the only indirect light image, you don't get any of the light directly from the light source. However, there's still a sizeable amount of light contained in the image, showing just how important indirect lighting is to a scene</p>
+
+        <h3>Ray Depth Comparison</h3>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>Accumulated Light</th>
+                        <th>Non-accumulated Light (nth bounce only)</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_indirect.png" width="400px" />
+                            <figcaption>1 ray depth</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_1m_0o.png" width="400px" />
+                            <figcaption>1 ray depth</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_2m_1o.png" width="400px" />
+                            <figcaption>2 ray depth</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_2m_0o.png" width="400px" />
+                            <figcaption>2 ray depth</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_3m_1o.png" width="400px" />
+                            <figcaption>3 ray depth</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_3m_0o.png" width="400px" />
+                            <figcaption>3 ray depth</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_4m_1o.png" width="400px" />
+                            <figcaption>4 ray depth</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_4m_0o.png" width="400px" />
+                            <figcaption>4 ray depth</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_5m_1o.png" width="400px" />
+                            <figcaption>5 ray depth</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_5m_0o.png" width="400px" />
+                            <figcaption>5 ray depth</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>
+            You can see how as the ray depth increases, the unaccumulated light becomes less. This makes sense as the more light bounces, the less intense it will be. For example, you can notice how in depth 2 and 3, it gets darker. Overall, adding all these secondary bounces greatly contributes to the quality of the image. However, at a certain level (ex 5 ray depth), the unaccumulated light is so minimal that it hardly makes a difference.
+        </p>
+
+        <h3>Russian Roulette</h3>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_rr_0.png" width="400px" />
+                            <figcaption>0 ray depth</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_rr_1.png" width="400px" />
+                            <figcaption>1 ray depth</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_rr_2.png" width="400px" />
+                            <figcaption>2 ray depth</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_rr_3.png" width="400px" />
+                            <figcaption>3 ray depth</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_rr_4.png" width="400px" />
+                            <figcaption>4 ray depth</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_rr_100m_1024.png" width="400px" />
+                            <figcaption>100 ray depth</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3>Various sample rates</h3>
+        <p>4 light rays</p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_1s.png" width="400px" />
+                            <figcaption>1 camera sample</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_2s.png" width="400px" />
+                            <figcaption>2 camera sample</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_4s.png" width="400px" />
+                            <figcaption>4 camera sample</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_8s.png" width="400px" />
+                            <figcaption>8 camera sample</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_16s.png" width="400px" />
+                            <figcaption>16 camera sample</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_64s.png" width="400px" />
+                            <figcaption>64 camera sample</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task4/bunny_1024s.png" width="400px" />
+                            <figcaption>1024 camera sample</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>PHEW, that was a LOT of renders. My computer is smoking after this. We notice that with low pixel samples, the entire image is very grainy compared to high samples. This is different than the noise we saw with low light samples. Here, with low camera samples, the noise is uniform across the entire screen.</p>
+
+        <h2>Part 5: Adaptive Sampling</h2>
+
+        <p>With the light afire within our hearts, a bright light atop a pillar dubbed the sun was restored in our cybercity. Our overlords enjoyed the richness of illuminated daily life and began to hire artists to demonstrate the beauty of direct and global illumination. One such artist took inspiration from our sampling algorithms in a piece called "Costco free sample-ing". We had noticed the artist would consistently go back to solid colors they drew and draw more of the same color on top. We asked why and were told that our sampling algorithm worked the same way. Oh no! How inefficient! Our cyber overlords would certainly be pissed if they knew our global illumination was far from perfect. Thus, to honor "Costco Free Sample-ing", we implemented adaptive sampling. </p>
+
+        <p>Adaptive sampling selectively samples areas that converge slower more often than areas that converge quickly. It essentially will sample a pixel until it has converged or hit the max samples per pixel. To measure whether a pixel has converged, we used the standard error and compared it to the mean.</p>
+
+        <p>
+            \(1.96 \frac{\sigma}{\sqrt{n}} \leq \text{max_tolerance}\cdot{\mu}\)
+        </p>
+
+        <p>
+            Where \(\mu\) is the mean and max_tolerance is defaulted to 0.05 (but is changeable). In our <code>PathTracer::raytrace_pixel()</code> function, every <code>samples_per_batch</code> samples we calculate the mean and variance to check whether the pixel has converged. To do this, we add each sample's illuminance to a sum and the square of its illuminance to another variable.
+        </p>
+
+        <p>
+            \(s_1=\sum_{k=1}^{n} x_k^2\) <br />
+            \(s_2=\sum_{k=1}^{n} x_k\) <br />
+            \(\mu = \frac{s_1}{n}\) <br />
+            \(\sigma^2=\frac{1}{n-1}\cdot s_2-\frac{s_1^2}{n}\)
+        </p>
+
+        <p>Once we find a pixel has converged, we terminate the loop and stop sampling the pixel. </p>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>Render</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task5/adapt_bunny_r.png" width="400px" />
+                            <figcaption>Bunny</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task5/adapt_bunny_d.png" width="400px" />
+                            <figcaption>Bunny data</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task5/adapt_sphere_r.png" width="400px" />
+                            <figcaption>Spheres</figcaption>
+                        </figure>
+                    </td>
+                    <td style="text-align: center;">
+                        <figure>
+                            <img src="images/Task5/adapt_sphere_d.png" width="400px" />
+                            <figcaption>Spheres data</figcaption>
+                        </figure>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h2>(Optional) Part 6: Extra Credit Opportunities</h2>
+
+        <h3>GUI</h3>
+        <p>Added a toggleable button to turn on and off Russian Roulette (the z button). Also added a toggleable button to switch between direct lighting only, indirect lighting only, and both (q button). This was done by modifying the application.cpp script and the raytyraced_renderer.cpp script to take in the additional keys during the RENDER VIEW to update booleans</p>
+        <figure>
+            <img src="images/Task6/toggle.png" alt="code" style="width:70%" />
+            <figcaption>Toggle Code in raytraced_renderer.cpp</figcaption>
+        </figure>
+
+        <h3>BVH primative in-place partitioning</h3>
+        <p>As mentioned in Task 2, the primative pointer vector, <code>primatives</code>, is sorted in place to partition all primative pointers associated with the left BVH node and the right BVH node. This paritioning groups the primative pointers together which eliminates the need to create new primative pointer vectors. Each BVH node then points to the start and end of their particular portion of the total vector.</p>
+    </div>
+</body>
+</html>
