@@ -1,6 +1,6 @@
 // <reference path="../node_modules/@types/p5/global.d.ts" />
-IMGDIR = '../data/img/'
-SNDDIR = '../data/sound/'
+IMGDIR = './data/img/'
+SNDDIR = './data/sound/'
 let mnw
 let network
 let trimmedGraph
@@ -43,9 +43,9 @@ let gentype = null
 function preload() {
   networkSettings = loadJSON("data/nws_decent.json")
   
-  font = loadFont('../font/D-DINExp.otf')
+  font = loadFont('./font/D-DINExp.otf')
   logo = loadImage(IMGDIR + 'TITLE.svg')
-  boldfont = loadFont('../font/D-DINExp-Bold.otf')
+  boldfont = loadFont('./font/D-DINExp-Bold.otf')
   board = loadImage(IMGDIR + 'BACKBOARD.svg')
   bolt = loadImage(IMGDIR + 'BOLT.svg')
   repair = loadImage(IMGDIR + 'REPAIR.svg')
